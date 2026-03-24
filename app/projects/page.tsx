@@ -8,7 +8,7 @@ export default function Projects() {
         Projects
       </h1>
       <p className="text-[var(--text-muted)] text-lg mb-12">
-        Things I&apos;ve built — real problems, real code.
+        Things I&apos;ve built — to learn, to explore, to solve.
       </p>
 
       <div className="grid grid-cols-2 gap-8">
