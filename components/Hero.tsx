@@ -18,8 +18,8 @@ export default function Hero() {
       {/* Bio */}
       <p className="mt-8 max-w-2xl text-[var(--text-muted)] text-lg leading-relaxed">
         I&apos;m a builder at heart — working at the intersection of business and technology.
-        Incoming NUS Business student, currently at PwC&apos;s Risk & AI team. I build AI agents,
-        tools, and products that solve real problems.
+        Incoming NUS Business student, currently at PwC&apos;s Risk Services & AI team. I build cloud
+        architecture, AI agents, and solutions to real problems.
       </p>
     </section>
   )

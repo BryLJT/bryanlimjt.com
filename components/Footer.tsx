@@ -9,13 +9,13 @@ export default function Footer() {
         </p>
         <div className="flex items-center gap-6">
           <a
-            href="mailto:your@email.com"
+            href="mailto:bryanlimjt@gmail.com"
             className="text-sm text-[var(--nav-muted)] hover:text-[var(--nav-text)] transition-colors"
           >
             Email
           </a>
           <a
-            href="https://linkedin.com/in/yourhandle"
+            href="https://linkedin.com/in/bryanlimjt"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-[var(--nav-muted)] hover:text-[var(--nav-text)] transition-colors"
@@ -23,7 +23,7 @@ export default function Footer() {
             LinkedIn
           </a>
           <a
-            href="https://github.com/yourhandle"
+            href="https://github.com/BryLJT"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-[var(--nav-muted)] hover:text-[var(--nav-text)] transition-colors"
