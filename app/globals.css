@@ -1,26 +1,21 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ─── Swap this one line to change theme ───────────────────────
+   Options:
+     ./theme-parchment.css    (warm cream)
+     ./theme-midnight.css     (deep navy, quiet)
+     ./theme-sky.css          (light airy blue)
+     ./theme-golden-coast.css (warm cream + navy, coastal luxury)
+     ./theme-premium.css      (warm linen + navy, clean and refined)
+──────────────────────────────────────────────────────────────── */
+@import "./theme-golden-coast.css";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

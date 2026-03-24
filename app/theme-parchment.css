@@ -1,0 +1,10 @@
+/* Parchment — warm cream, current default */
+:root {
+  --background: #F7EACE;
+  --foreground: #2C2417;
+  --text-muted: #8C7B6B;
+  --border: #EDDDB0;
+  --nav-bg: #7A5C42;
+  --nav-text: #F5EDE0;
+  --nav-muted: #C4A882;
+}

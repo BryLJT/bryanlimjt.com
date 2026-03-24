@@ -1,0 +1,10 @@
+/* Sky — light airy blue-white, fresh and open */
+:root {
+  --background: #EDF4F8;
+  --foreground: #1A2B3C;
+  --text-muted: #6A8A9E;
+  --border: #D4E6EF;
+  --nav-bg: #2C4A5E;
+  --nav-text: #E8F2F8;
+  --nav-muted: #7AAFC4;
+}
