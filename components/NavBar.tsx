@@ -15,7 +15,7 @@ export default function NavBar() {
 
   return (
     <nav className="w-full px-8 py-5 flex items-center justify-between bg-[var(--nav-bg)]">
-      <Link href="/" className="font-display text-lg font-semibold tracking-tight text-[var(--nav-text)]">
+      <Link href="/" className="font-display text-2xl font-semibold tracking-tight text-[var(--nav-text)]">
         Bryan Lim
       </Link>
       <ul className="flex items-center gap-8">

@@ -5,13 +5,12 @@ export default function Hero() {
     <section className="max-w-5xl mx-auto px-8 pt-20 pb-16">
       {/* Photo + name row */}
       <div className="flex items-center gap-8">
-        <div className="relative w-28 h-28 rounded-full overflow-hidden bg-stone-200 flex-shrink-0">
+        <div className="relative w-52 h-52 rounded-full overflow-hidden bg-stone-200 flex-shrink-0">
           {/* Replace src with your actual photo path */}
-          <div className="absolute inset-0 bg-stone-300" />
-          {/* <Image src="/images/headshot.jpg" alt="Bryan Lim" fill className="object-cover" /> */}
+          <Image src="/images/headshot.jpeg" alt="Bryan Lim" fill className="object-cover" />
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-semibold text-[var(--foreground)] leading-tight">
-          Nice to meet you, I&apos;m Bryan Lim
+          Nice to meet you,<br />I&apos;m Bryan Lim
         </h1>
       </div>
 
