@@ -11,29 +11,29 @@ export default function Contact() {
 
       <div className="space-y-6">
         <a
-          href="mailto:your@email.com"
+          href="mailto:bryanlimjt@gmail.com"
           className="flex items-center gap-4 group"
         >
           <span className="text-sm text-[var(--text-muted)] w-20">Email</span>
-          <span className="text-[var(--foreground)] group-hover:underline">your@email.com</span>
+          <span className="text-[var(--foreground)] group-hover:underline">bryanlimjt@gmail.com</span>
         </a>
         <a
-          href="https://linkedin.com/in/yourhandle"
+          href="https://linkedin.com/in/bryanlimjt"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-4 group"
         >
           <span className="text-sm text-[var(--text-muted)] w-20">LinkedIn</span>
-          <span className="text-[var(--foreground)] group-hover:underline">linkedin.com/in/yourhandle</span>
+          <span className="text-[var(--foreground)] group-hover:underline">linkedin.com/in/bryanlimjt</span>
         </a>
         <a
-          href="https://github.com/yourhandle"
+          href="https://github.com/BryLJT"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-4 group"
         >
           <span className="text-sm text-[var(--text-muted)] w-20">GitHub</span>
-          <span className="text-[var(--foreground)] group-hover:underline">github.com/yourhandle</span>
+          <span className="text-[var(--foreground)] group-hover:underline">github.com/BryLJT</span>
         </a>
       </div>
     </div>
