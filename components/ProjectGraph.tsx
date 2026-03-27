@@ -23,12 +23,18 @@ const EDGE_REST     = 50   // push apart if closer than this
 const EDGE_MAX      = 160  // pull together if farther than this
 const EDGE_SPRING   = 0.007
 
+// Drag spring: replaces band spring for connections touching the dragged node.
+// No dead zone — elastic at all distances. Creates Obsidian-like fluid follow.
+const DRAG_REST     = 90   // rest length while a neighbor is being dragged
+const DRAG_SPRING   = 0.022
+
 function tick(
   nodes: PhysicsNode[],
   links: GraphLink[],
   cx: number,
   cy: number,
   alpha: number,
+  draggingId: string | null,
 ) {
   // Repulsion between every pair
   for (let i = 0; i < nodes.length; i++) {
@@ -44,7 +50,7 @@ function tick(
     }
   }
 
-  // Band spring along edges: push apart if too close, pull together if too far
+  // Springs along edges
   const map = new Map(nodes.map(n => [n.id, n]))
   for (const { source, target } of links) {
     const s = map.get(source as string), t = map.get(target as string)
@@ -52,9 +58,14 @@ function tick(
     const dx = t.x! - s.x!, dy = t.y! - s.y!
     const d  = Math.sqrt(dx * dx + dy * dy) || 1
     let f = 0
-    if (d < EDGE_REST)      f = -(EDGE_REST - d) * EDGE_SPRING * alpha  // too close → repel
-    else if (d > EDGE_MAX)  f =  (d - EDGE_MAX)  * EDGE_SPRING * alpha  // too far   → attract
-    // dead zone [EDGE_REST, EDGE_MAX]: f stays 0
+    if (draggingId && (source === draggingId || target === draggingId)) {
+      // Active drag: elastic spring with no dead zone — fluid follow behavior
+      f = (d - DRAG_REST) * DRAG_SPRING * alpha
+    } else {
+      // Idle: band spring with dead zone — gentle, loose at rest
+      if (d < EDGE_REST)      f = -(EDGE_REST - d) * EDGE_SPRING * alpha
+      else if (d > EDGE_MAX)  f =  (d - EDGE_MAX)  * EDGE_SPRING * alpha
+    }
     const fx = (dx / d) * f, fy = (dy / d) * f
     if (!s.pinned) { s.vx += fx; s.vy += fy }
     if (!t.pinned) { t.vx -= fx; t.vy -= fy }
@@ -166,9 +177,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
       const cx    = rect.width  / 2
       const cy    = rect.height / 2
 
-      // Physics
-      if (alphaRef.current > 0.001) {
-        tick(nodes, links, cx, cy, alphaRef.current)
+      // Physics — pass dragging ID so tick() can apply drag spring
+      if (alphaRef.current > 0.001 || draggingRef.current) {
+        tick(nodes, links, cx, cy, alphaRef.current, draggingRef.current)
         alphaRef.current *= 0.992
       }
 
@@ -284,15 +295,7 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
       if (n) {
         n.x! += dx
         n.y! += dy
-        // Nudge directly connected nodes so they visibly react to the drag
-        for (const { source, target } of linksRef.current) {
-          const neighborId =
-            source === draggingRef.current ? (target as string) :
-            target === draggingRef.current ? (source as string) : null
-          if (!neighborId) continue
-          const nb = nodes.find(m => m.id === neighborId)
-          if (nb && !nb.pinned) { nb.vx += dx * 0.3; nb.vy += dy * 0.3 }
-        }
+        // Keep physics running — drag spring in tick() handles connected nodes
         alphaRef.current = Math.max(alphaRef.current, 0.6)
       }
       lastPtrRef.current = { x: e.clientX, y: e.clientY }
