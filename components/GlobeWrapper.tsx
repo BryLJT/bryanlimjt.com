@@ -5,13 +5,13 @@ import dynamic from "next/dynamic"
 const Globe = dynamic(() => import("@/components/Globe"), {
   ssr: false,
   loading: () => (
-    <div className="w-full" style={{ height: 760, background: "#060d14" }} />
+    <div className="w-full" style={{ height: "min(900px, 100vw)", background: "#060d14" }} />
   ),
 })
 
 export default function GlobeWrapper() {
   return (
-    <div className="w-full pt-16 md:pt-40" style={{ background: "#060d14" }}>
+    <div className="w-full pt-8 md:pt-16" style={{ background: "#060d14" }}>
       <p
         className="text-center font-display"
         style={{
