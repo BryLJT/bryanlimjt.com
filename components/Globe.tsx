@@ -203,8 +203,8 @@ export default function Globe() {
 
           return (
             <g key={i}>
-              {/* Callout lines + labels — hidden on mobile */}
-              {showLabels && (
+              {showLabels ? (
+                /* Desktop: full callout lines */
                 <>
                   <polyline
                     points={`${x},${y} ${ex},${ey} ${hx},${hy}`}
@@ -229,6 +229,20 @@ export default function Globe() {
                     {MARKERS[i].label}
                   </text>
                 </>
+              ) : (
+                /* Mobile: simple text beside dot, font scaled to screen pixels */
+                <text
+                  x={x + sign * (18 * GLOBE_SIZE / displaySize)}
+                  y={y + (5 * GLOBE_SIZE / displaySize)}
+                  fill="rgba(251,191,36,0.9)"
+                  fontSize={11 * GLOBE_SIZE / displaySize}
+                  fontWeight="600"
+                  textAnchor={isRight ? "start" : "end"}
+                  style={{ pointerEvents: "auto", cursor: "pointer", fontFamily: "inherit" }}
+                  onClick={goToProjects}
+                >
+                  {MARKERS[i].label}
+                </text>
               )}
 
               {/* Hit target always present */}
