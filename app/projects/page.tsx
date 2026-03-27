@@ -20,65 +20,105 @@ export default function Projects() {
           Click a node · Drag to move · Scroll to zoom
         </p>
 
-        {/* Graph box */}
-        <div style={{
-          width: "100%",
-          height: 620,
-          borderRadius: 16,
-          overflow: "hidden",
-          border: "1px solid rgba(0,0,0,0.08)",
-        }}>
-          <ProjectGraph onSelect={setSelected} selected={selected} />
-        </div>
+        {/* Master-detail: graph shrinks left, detail slides in right */}
+        <div style={{ display: "flex", height: 620 }}>
 
-        {/* Project detail */}
-        {selected && (
-          <div style={{ marginTop: 64 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40 }}>
-              <h2 className="font-display" style={{ fontSize: 32, fontWeight: 600, color: "var(--foreground)" }}>
-                {selected.name}
-              </h2>
-              <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-                {selected.live && (
-                  <a href={selected.live} target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 14, color: "#fabc0e", fontWeight: 600, textDecoration: "none" }}>
-                    Live site ↗
-                  </a>
-                )}
-                {selected.github && (
-                  <a href={selected.github} target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 14, color: "var(--foreground)", fontWeight: 500, textDecoration: "none", opacity: 0.7 }}>
-                    GitHub ↗
-                  </a>
-                )}
-              </div>
-            </div>
+          {/* Graph box — full width by default, half width when a project is selected */}
+          <div style={{
+            width: selected ? "50%" : "100%",
+            flexShrink: 0,
+            height: "100%",
+            borderRadius: 16,
+            overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.08)",
+            transition: "width 0.4s ease",
+          }}>
+            <ProjectGraph onSelect={setSelected} selected={selected} />
+          </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "flex-start" }}>
-              <div style={{
-                position: "relative", width: "100%", aspectRatio: "16/9",
-                borderRadius: 12, overflow: "hidden", background: "rgba(0,0,0,0.05)",
-              }}>
-                <Image src={selected.image} alt={selected.name} fill sizes="(max-width: 1200px) 50vw, 600px" className="object-cover" />
-              </div>
-              <div>
-                <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 28 }}>
-                  {selected.description}
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {selected.tags.map(tag => (
-                    <span key={tag} style={{
-                      fontSize: 12, fontWeight: 500, padding: "5px 14px", borderRadius: 9999,
-                      background: "rgba(0,0,0,0.06)", color: "var(--text-muted)", letterSpacing: "0.02em",
-                    }}>
-                      {tag}
-                    </span>
-                  ))}
+          {/* Detail panel — clips to 0 when nothing selected, expands on click */}
+          <div style={{
+            width: selected ? "50%" : "0%",
+            flexShrink: 0,
+            height: "100%",
+            overflow: "hidden",
+            transition: "width 0.4s ease",
+          }}>
+            {/* Inner scroll container with left padding for the gap */}
+            <div style={{
+              width: "100%",
+              height: "100%",
+              paddingLeft: 24,
+              paddingRight: 4,
+              paddingTop: 4,
+              paddingBottom: 4,
+              overflowY: "auto",
+              boxSizing: "border-box",
+              opacity: selected ? 1 : 0,
+              transition: "opacity 0.25s ease 0.2s",
+            }}>
+              {selected && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+
+                  {/* Title + links */}
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                    <h2 className="font-display" style={{ fontSize: 26, fontWeight: 600, color: "var(--foreground)", lineHeight: 1.2, margin: 0 }}>
+                      {selected.name}
+                    </h2>
+                    <div style={{ display: "flex", gap: 16, alignItems: "center", flexShrink: 0 }}>
+                      {selected.live && (
+                        <a href={selected.live} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 13, color: "#fabc0e", fontWeight: 600, textDecoration: "none" }}>
+                          Live ↗
+                        </a>
+                      )}
+                      {selected.github && (
+                        <a href={selected.github} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 13, color: "var(--foreground)", fontWeight: 500, textDecoration: "none", opacity: 0.6 }}>
+                          GitHub ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Image */}
+                  <div style={{
+                    position: "relative", width: "100%", aspectRatio: "16/9",
+                    borderRadius: 10, overflow: "hidden", background: "rgba(0,0,0,0.05)",
+                    flexShrink: 0,
+                  }}>
+                    <Image
+                      src={selected.image}
+                      alt={selected.name}
+                      fill
+                      sizes="(max-width: 1200px) 50vw, 576px"
+                      className="object-cover"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
+                    {selected.description}
+                  </p>
+
+                  {/* Tags */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {selected.tags.map(tag => (
+                      <span key={tag} style={{
+                        fontSize: 12, fontWeight: 500, padding: "5px 14px", borderRadius: 9999,
+                        background: "rgba(0,0,0,0.06)", color: "var(--text-muted)", letterSpacing: "0.02em",
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        )}
+
+        </div>
       </div>
 
       {/* ── Mobile layout (below md) ─────────────────────────────────────────── */}
