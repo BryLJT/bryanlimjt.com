@@ -284,9 +284,16 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
       if (n) {
         n.x! += dx
         n.y! += dy
-        // Keep physics hot so repulsion pushes nearby nodes aside naturally
-        // and band spring lets connected nodes pivot freely around the dragged node
-        alphaRef.current = Math.max(alphaRef.current, 0.4)
+        // Nudge directly connected nodes so they visibly react to the drag
+        for (const { source, target } of linksRef.current) {
+          const neighborId =
+            source === draggingRef.current ? (target as string) :
+            target === draggingRef.current ? (source as string) : null
+          if (!neighborId) continue
+          const nb = nodes.find(m => m.id === neighborId)
+          if (nb && !nb.pinned) { nb.vx += dx * 0.3; nb.vy += dy * 0.3 }
+        }
+        alphaRef.current = Math.max(alphaRef.current, 0.6)
       }
       lastPtrRef.current = { x: e.clientX, y: e.clientY }
       return
@@ -322,7 +329,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     const node  = findNode(world.x, world.y)
     if (!node || node.type !== "project") return
     const proj = projects.find(p => p.id === node.projectId) ?? null
-    if (proj) onSelect?.(proj)
+    if (!proj) return
+    // Toggle: clicking the already-selected node deselects it
+    onSelect?.(selectedRef.current?.id === proj.id ? null : proj)
   }, [toWorld, findNode, onSelect])
 
   const onWheel = useCallback((e: React.WheelEvent) => {
