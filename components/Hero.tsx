@@ -2,12 +2,12 @@ import Image from "next/image"
 
 export default function Hero() {
   return (
-    <section className="max-w-5xl mx-auto px-8 pt-20 pb-16">
+    <section className="max-w-5xl mx-auto px-8 pt-20 pb-36">
       {/* Photo + name row */}
       <div className="flex items-center gap-8">
         <div className="relative w-52 h-52 rounded-full overflow-hidden bg-stone-200 flex-shrink-0">
           {/* Replace src with your actual photo path */}
-          <Image src="/images/headshot.jpeg" alt="Bryan Lim" fill className="object-cover" />
+          <Image src="/images/headshot.jpeg" alt="Bryan Lim" fill sizes="208px" className="object-cover" priority />
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-semibold text-[var(--foreground)] leading-tight">
           Nice to meet you,<br />I&apos;m Bryan Lim
