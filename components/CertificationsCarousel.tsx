@@ -111,11 +111,11 @@ export default function CertificationsCarousel() {
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
       >
-        {/* Left arrow */}
+        {/* Left arrow — desktop only */}
         <button
           onClick={prev}
           aria-label="Previous certification"
-          className="absolute left-8 z-10 w-10 h-10 rounded-full flex items-center justify-center text-xl transition-colors"
+          className="hidden sm:flex absolute left-8 z-10 w-10 h-10 rounded-full items-center justify-center text-xl transition-colors"
           style={{ background: "rgba(0,0,0,0.07)", color: "#555" }}
           onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.12)")}
           onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.07)")}
@@ -123,13 +123,15 @@ export default function CertificationsCarousel() {
           ‹
         </button>
 
-        {/* Left pivot */}
-        <CertCard
-          cert={certifications[leftIdx]}
-          onClick={prev}
-          scale={0.82}
-          opacity={0.4}
-        />
+        {/* Left pivot — desktop only */}
+        <div className="hidden sm:block">
+          <CertCard
+            cert={certifications[leftIdx]}
+            onClick={prev}
+            scale={0.82}
+            opacity={0.4}
+          />
+        </div>
 
         {/* Center active */}
         <CertCard
@@ -138,19 +140,21 @@ export default function CertificationsCarousel() {
           opacity={1}
         />
 
-        {/* Right pivot */}
-        <CertCard
-          cert={certifications[rightIdx]}
-          onClick={next}
-          scale={0.82}
-          opacity={0.4}
-        />
+        {/* Right pivot — desktop only */}
+        <div className="hidden sm:block">
+          <CertCard
+            cert={certifications[rightIdx]}
+            onClick={next}
+            scale={0.82}
+            opacity={0.4}
+          />
+        </div>
 
-        {/* Right arrow */}
+        {/* Right arrow — desktop only */}
         <button
           onClick={next}
           aria-label="Next certification"
-          className="absolute right-8 z-10 w-10 h-10 rounded-full flex items-center justify-center text-xl transition-colors"
+          className="hidden sm:flex absolute right-8 z-10 w-10 h-10 rounded-full items-center justify-center text-xl transition-colors"
           style={{ background: "rgba(0,0,0,0.07)", color: "#555" }}
           onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.12)")}
           onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.07)")}
