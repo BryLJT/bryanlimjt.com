@@ -11,7 +11,7 @@ const Globe = dynamic(() => import("@/components/Globe"), {
 
 export default function GlobeWrapper() {
   return (
-    <div className="w-full" style={{ background: "#060d14", paddingTop: "160px" }}>
+    <div className="w-full pt-16 md:pt-40" style={{ background: "#060d14" }}>
       <p
         className="text-center font-display"
         style={{

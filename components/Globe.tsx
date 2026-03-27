@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import createGlobe from "cobe"
 
-const GLOBE_SIZE = 900
+const GLOBE_SIZE  = 900  // WebGL render size (kept large for quality)
 const THETA = 0.1
 
 const MARKERS = [
@@ -61,6 +61,15 @@ export default function Globe() {
   const [positions, setPositions] = useState<MarkerPos[]>(() =>
     MARKERS_3D.map(p => project(p, 1.5, THETA))
   )
+
+  // Responsive display size — globe shrinks to fit viewport on mobile
+  const [displaySize, setDisplaySize] = useState(GLOBE_SIZE)
+  useEffect(() => {
+    const update = () => setDisplaySize(Math.min(GLOBE_SIZE, window.innerWidth))
+    update()
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
+  }, [])
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -125,8 +134,10 @@ export default function Globe() {
 
   const goToProjects = useCallback(() => router.push("/projects"), [router])
 
+  const showLabels = displaySize >= 600
+
   return (
-    <div className="relative" style={{ height: GLOBE_SIZE, maxWidth: "100%", overflow: "visible" }}>
+    <div className="relative" style={{ height: displaySize, maxWidth: "100%", overflow: "visible" }}>
 
       {/* Top fade */}
       <div className="absolute top-0 left-0 right-0 pointer-events-none"
@@ -153,21 +164,22 @@ export default function Globe() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width:  GLOBE_SIZE,
-          height: GLOBE_SIZE,
+          width:  displaySize,
+          height: displaySize,
           cursor: "grab",
         }}
       />
 
       {/* Callout lines + labels — SVG sits exactly over the canvas */}
       <svg
+        viewBox={`0 0 ${GLOBE_SIZE} ${GLOBE_SIZE}`}
         style={{
           position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width:  GLOBE_SIZE,
-          height: GLOBE_SIZE,
+          width:  displaySize,
+          height: displaySize,
           overflow: "visible",
           pointerEvents: "none",
           zIndex: 15,
@@ -191,40 +203,41 @@ export default function Globe() {
 
           return (
             <g key={i}>
-              {/* Callout line — not interactive */}
-              <polyline
-                points={`${x},${y} ${ex},${ey} ${hx},${hy}`}
-                fill="none"
-                stroke="rgba(251,191,36,0.5)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* Dot at label end */}
-              <circle cx={hx} cy={hy} r="3" fill="rgba(251,191,36,0.7)" />
+              {/* Callout lines + labels — hidden on mobile */}
+              {showLabels && (
+                <>
+                  <polyline
+                    points={`${x},${y} ${ex},${ey} ${hx},${hy}`}
+                    fill="none"
+                    stroke="rgba(251,191,36,0.5)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx={hx} cy={hy} r="3" fill="rgba(251,191,36,0.7)" />
+                  <text
+                    x={hx + sign * 8}
+                    y={hy + 5}
+                    fill="rgba(251,191,36,0.9)"
+                    fontSize="14"
+                    fontWeight="600"
+                    letterSpacing="0.04em"
+                    textAnchor={isRight ? "start" : "end"}
+                    style={{ pointerEvents: "auto", cursor: "pointer", fontFamily: "inherit" }}
+                    onClick={goToProjects}
+                  >
+                    {MARKERS[i].label}
+                  </text>
+                </>
+              )}
 
-              {/* Invisible hit target over the WebGL globe dot */}
+              {/* Hit target always present */}
               <circle
                 cx={x} cy={y} r={18}
                 fill="transparent"
                 style={{ pointerEvents: "auto", cursor: "pointer" }}
                 onClick={goToProjects}
               />
-
-              {/* Label — clickable */}
-              <text
-                x={hx + sign * 8}
-                y={hy + 5}
-                fill="rgba(251,191,36,0.9)"
-                fontSize="14"
-                fontWeight="600"
-                letterSpacing="0.04em"
-                textAnchor={isRight ? "start" : "end"}
-                style={{ pointerEvents: "auto", cursor: "pointer", fontFamily: "inherit" }}
-                onClick={goToProjects}
-              >
-                {MARKERS[i].label}
-              </text>
             </g>
           )
         })}
