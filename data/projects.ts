@@ -21,7 +21,7 @@ export const projects: Project[] = [
   {
     id: "accelcalendar",
     name: "AccelCalendar",
-    description: "Scheduling and calendar management tool for Accellearn — streamlining timetable arrangements, teacher availability, and personalised user experience.",
+    description: "Scheduling and calendar management tool built for Accellearn — used by a growing team of 15 teachers, saving hours of administrative time and streamlining company-wide scheduling.",
     image: "/images/accelcalendar.jpg",
     tags: ["Next.js", "TypeScript", "PostgreSQL"],
     featured: true,
