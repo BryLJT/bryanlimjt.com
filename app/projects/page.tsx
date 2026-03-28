@@ -93,17 +93,23 @@ export default function Projects() {
 
                   {/* Image */}
                   <div style={{
-                    position: "relative", width: "100%", aspectRatio: "16/9",
-                    borderRadius: 10, overflow: "hidden", background: "#060d14",
+                    width: selected.portrait ? 260 : "100%",
+                    margin: selected.portrait ? "0 auto" : undefined,
                     flexShrink: 0,
                   }}>
-                    <Image
-                      src={selected.image}
-                      alt={selected.name}
-                      fill
-                      sizes="(max-width: 1200px) 50vw, 576px"
-                      className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"}
-                    />
+                    <div style={{
+                      position: "relative", width: "100%",
+                      aspectRatio: selected.portrait ? "9/16" : "16/9",
+                      borderRadius: 10, overflow: "hidden", background: "#060d14",
+                    }}>
+                      <Image
+                        src={selected.image}
+                        alt={selected.name}
+                        fill
+                        sizes="(max-width: 1200px) 50vw, 576px"
+                        className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"}
+                      />
+                    </div>
                   </div>
 
                   {/* Description */}
@@ -206,8 +212,14 @@ export default function Projects() {
               )}
 
               {/* Image */}
-              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: 10, overflow: "hidden", background: "#060d14", flexShrink: 0 }}>
-                <Image src={selected.image} alt={selected.name} fill sizes="100vw" className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"} />
+              <div style={{
+                width: selected.portrait ? 220 : "100%",
+                margin: selected.portrait ? "0 auto" : undefined,
+                flexShrink: 0,
+              }}>
+                <div style={{ position: "relative", width: "100%", aspectRatio: selected.portrait ? "9/16" : "16/9", borderRadius: 10, overflow: "hidden", background: "#060d14" }}>
+                  <Image src={selected.image} alt={selected.name} fill sizes="100vw" className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"} />
+                </div>
               </div>
 
               {/* Description */}

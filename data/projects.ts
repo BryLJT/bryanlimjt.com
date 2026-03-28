@@ -4,6 +4,7 @@ export type Project = {
   description: string
   image: string
   imageStyle?: "cover" | "contain"   // default "cover"; use "contain" for portrait images
+  portrait?: boolean                  // true = use 9/16 aspect ratio container instead of 16/9
   tags: string[]
   github?: string
   live?: string
@@ -51,7 +52,8 @@ export const projects: Project[] = [
     name: "Weatherbot",
     description: "Location specific Telegram weather bot for Singapore — daily forecasts, UV index alerts, and scheduled morning push notifications.",
     image: "/images/weatherbot.jpg",
-    imageStyle: "contain",
+    imageStyle: "cover",
+    portrait: true,
     tags: ["Python", "Telegram API", "Data.gov.sg"],
     featured: true,
   },
