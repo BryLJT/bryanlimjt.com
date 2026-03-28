@@ -36,6 +36,17 @@ export default function Contact() {
           <span className="text-[var(--foreground)] group-hover:underline">github.com/BryLJT</span>
         </a>
       </div>
+
+      <div className="mt-12">
+        <a
+          href="/Bryan_Lim_Resume.pdf"
+          download="Bryan_Lim_Resume.pdf"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
+          style={{ background: "var(--foreground)", color: "var(--background)" }}
+        >
+          Download Resume ↓
+        </a>
+      </div>
     </div>
   )
 }
