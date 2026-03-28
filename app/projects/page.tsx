@@ -7,6 +7,16 @@ import { Project } from "@/data/projects"
 
 export default function Projects() {
   const [selected, setSelected] = useState<Project | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile breakpoint — single <ProjectGraph> mounts in only one layout at a time
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)")
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
 
   // Lock body scroll when bottom sheet is open (mobile)
   useEffect(() => {
@@ -41,7 +51,7 @@ export default function Projects() {
             border: "1px solid rgba(0,0,0,0.08)",
             transition: "width 0.4s ease",
           }}>
-            <ProjectGraph onSelect={setSelected} selected={selected} />
+            {!isMobile && <ProjectGraph onSelect={setSelected} selected={selected} />}
           </div>
 
           {/* Detail panel — clips to 0 when nothing selected, expands on click */}
@@ -141,7 +151,7 @@ export default function Projects() {
           borderRadius: 16, overflow: "hidden",
           border: "1px solid rgba(0,0,0,0.08)",
         }}>
-          <ProjectGraph onSelect={setSelected} selected={selected} />
+          {isMobile && <ProjectGraph onSelect={setSelected} selected={selected} />}
         </div>
 
         {/* Backdrop */}
@@ -162,6 +172,7 @@ export default function Projects() {
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
           maxHeight: "72vh", overflowY: "auto",
           padding: "0 24px 48px",
+          pointerEvents: selected ? "auto" : "none",
         }}>
           {/* Handle bar */}
           <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 8px" }}>

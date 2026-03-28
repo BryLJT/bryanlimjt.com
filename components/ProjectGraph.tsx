@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useCallback } from "react"
+import { useRef, useEffect, useCallback, useMemo } from "react"
 import { buildGraphData, GraphNode, GraphLink } from "@/data/graph"
 import { projects, Project } from "@/data/projects"
 
@@ -47,13 +47,10 @@ function clampCamera(cam: { x: number; y: number; zoom: number }, w: number, h: 
   cam.y = Math.max(-MARGIN * h, Math.min((1 + MARGIN) * h, screenCy)) - cy * cam.zoom
 }
 
-// ─── Static graph data ────────────────────────────────────────────────────────
-
-const GRAPH_DATA = buildGraphData()
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ProjectGraph({ onSelect, selected: selectedProp = null }: Props) {
+  const GRAPH_DATA  = useMemo(() => buildGraphData(), [])
   const canvasRef   = useRef<HTMLCanvasElement>(null)
   const nodesRef    = useRef<SimNode[]>([])
   const linksRef    = useRef<GraphLink[]>(GRAPH_DATA.links)
@@ -238,13 +235,13 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
 
         // Label
         if (isProject || isCert) {
-          ctx.font         = `600 ${11 / cam.zoom}px Inter, sans-serif`
+          ctx.font         = `600 ${Math.max(8, Math.min(14, 11 / cam.zoom))}px Inter, sans-serif`
           ctx.fillStyle    = isProject ? "rgba(250,188,14,0.92)" : "rgba(74,222,128,0.88)"
           ctx.textAlign    = "center"
           ctx.textBaseline = "top"
           ctx.fillText(node.label, x, y + r + 4 / cam.zoom)
         } else if (cam.zoom > 1.5) {
-          ctx.font         = `400 ${9 / cam.zoom}px Inter, sans-serif`
+          ctx.font         = `400 ${Math.max(8, Math.min(13, 9 / cam.zoom))}px Inter, sans-serif`
           ctx.fillStyle    = `rgba(180,200,220,${Math.min(0.55, (cam.zoom - 1.2) * 0.6)})`
           ctx.textAlign    = "center"
           ctx.textBaseline = "top"
@@ -364,32 +361,38 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     onSelect?.(selectedRef.current?.id === proj.id ? null : proj)
   }, [toWorld, findNode, onSelect])
 
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault()
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const cam    = cameraRef.current
-    const mx     = e.clientX - rect.left, my = e.clientY - rect.top
-    const factor = e.deltaY > 0 ? 0.92 : 1.08
-    const newZ   = Math.max(0.3, Math.min(3, cam.zoom * factor))
-    // Zoom toward cursor position
-    cam.x    = mx - ((mx - cam.x) / cam.zoom) * newZ
-    cam.y    = my - ((my - cam.y) / cam.zoom) * newZ
-    cam.zoom = newZ
-    clampCamera(cam, rect.width, rect.height)
+  // Wheel zoom — must be { passive: false } so preventDefault actually works.
+  // React 18 registers synthetic wheel listeners as passive, which silently ignores
+  // preventDefault, causing the page to scroll while zooming. Manual addEventListener bypasses this.
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const handler = (e: WheelEvent) => {
+      e.preventDefault()
+      const rect = canvas.getBoundingClientRect()
+      const cam    = cameraRef.current
+      const mx     = e.clientX - rect.left, my = e.clientY - rect.top
+      const factor = e.deltaY > 0 ? 0.92 : 1.08
+      const newZ   = Math.max(0.3, Math.min(3, cam.zoom * factor))
+      cam.x    = mx - ((mx - cam.x) / cam.zoom) * newZ
+      cam.y    = my - ((my - cam.y) / cam.zoom) * newZ
+      cam.zoom = newZ
+      clampCamera(cam, rect.width, rect.height)
+    }
+    canvas.addEventListener("wheel", handler, { passive: false })
+    return () => canvas.removeEventListener("wheel", handler)
   }, [])
 
   return (
     <div style={{ width: "100%", height: "100%", background: "#060d14", position: "relative", overflow: "hidden" }}>
       <canvas
         ref={canvasRef}
-        style={{ width: "100%", height: "100%", cursor: "grab", display: "block" }}
+        style={{ width: "100%", height: "100%", cursor: "grab", display: "block", touchAction: "none" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={(e) => onPointerUp(e)}
         onClick={onClick}
-        onWheel={onWheel}
       />
     </div>
   )
