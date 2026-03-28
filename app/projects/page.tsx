@@ -1,12 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectGraph from "@/components/ProjectGraph"
 import { Project } from "@/data/projects"
 
 export default function Projects() {
   const [selected, setSelected] = useState<Project | null>(null)
+
+  // Lock body scroll when bottom sheet is open (mobile)
+  useEffect(() => {
+    if (selected) {
+      document.body.style.overflow = "hidden"
+      return () => { document.body.style.overflow = "" }
+    }
+  }, [selected])
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "64px 48px 96px" }}>
