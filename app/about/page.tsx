@@ -17,8 +17,10 @@ export default function About() {
           That research background shapes how I think: rigorously, from first principles.
         </p>
         <p>
-          These days I build AI agents, tools, and products. I care deeply about learning effectively —
-          not just learning a lot — and about working with people who push me to think harder.
+          These days I build AI agents, tools, and products. What actually drives me is simpler than it
+          sounds: I like building things. There&apos;s something genuinely satisfying about taking an idea
+          that doesn&apos;t exist yet and making it real — a working system, a tool someone actually uses,
+          something that solves a problem it wasn&apos;t solving before. That&apos;s what pulls me back.
         </p>
         <p>
           I believe now (while young) is the time to sprint. Learn, do, fail, try again.
