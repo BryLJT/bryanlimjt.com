@@ -100,10 +100,13 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
 
   const findNode = useCallback((wx: number, wy: number): SimNode | null => {
     const nodes = nodesRef.current
+    const zoom  = cameraRef.current.zoom
+    // Iterate backwards: last-drawn node is visually on top, so it wins on overlap.
+    // Flipping this loop would break click priority for overlapping nodes — don't.
     for (let i = nodes.length - 1; i >= 0; i--) {
       const n = nodes[i]
-      if (n.type === "tech") continue          // tech nodes are decorative, not clickable
-      const r  = nodeRadius(n.type) + 8       // generous hit area
+      if (n.type === "tech") continue                    // tech nodes are decorative, not clickable
+      const r  = nodeRadius(n.type) + 8 / zoom          // 8px screen-space hit margin, constant regardless of zoom
       const dx = wx - n.x, dy = wy - n.y
       if (dx * dx + dy * dy <= r * r) return n
     }
@@ -186,15 +189,15 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
       ctx.translate(cam.x, cam.y)
       ctx.scale(cam.zoom, cam.zoom)
 
-      // Edges
+      // Edges — style set once before loop, all edges share the same appearance
+      ctx.strokeStyle = "rgba(255,255,255,0.06)"
+      ctx.lineWidth   = 1
       for (const { source, target } of links) {
         const s = nMap.get(source as string), t = nMap.get(target as string)
         if (!s || !t) continue
         ctx.beginPath()
         ctx.moveTo(s.x, s.y)
         ctx.lineTo(t.x, t.y)
-        ctx.strokeStyle = "rgba(255,255,255,0.06)"
-        ctx.lineWidth   = 1
         ctx.stroke()
       }
 

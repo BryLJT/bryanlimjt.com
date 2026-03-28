@@ -18,14 +18,6 @@ export default function Projects() {
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Lock body scroll when bottom sheet is open (mobile)
-  useEffect(() => {
-    if (selected) {
-      document.body.style.overflow = "hidden"
-      return () => { document.body.style.overflow = "" }
-    }
-  }, [selected])
-
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 48px 24px", height: "100vh", boxSizing: "border-box", overflow: "hidden" }}>
       <h1 className="font-display text-3xl font-semibold text-[var(--foreground)] mb-2">
