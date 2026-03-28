@@ -35,6 +35,18 @@ function nodeColor(type: string) {
     : "rgba(130,155,180,0.5)"
 }
 
+// ─── Camera helpers ───────────────────────────────────────────────────────────
+
+function clampCamera(cam: { x: number; y: number; zoom: number }, w: number, h: number) {
+  // Keep the world centre (w/2, h/2) within a 30% margin of the canvas in every direction
+  const MARGIN = 0.3
+  const cx = w / 2, cy = h / 2
+  const screenCx = cx * cam.zoom + cam.x
+  const screenCy = cy * cam.zoom + cam.y
+  cam.x = Math.max(-MARGIN * w, Math.min((1 + MARGIN) * w, screenCx)) - cx * cam.zoom
+  cam.y = Math.max(-MARGIN * h, Math.min((1 + MARGIN) * h, screenCy)) - cy * cam.zoom
+}
+
 // ─── Static graph data ────────────────────────────────────────────────────────
 
 const GRAPH_DATA = buildGraphData()
@@ -47,9 +59,11 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
   const linksRef    = useRef<GraphLink[]>(GRAPH_DATA.links)
   const nodeMapRef  = useRef<Map<string, SimNode>>(new Map())
   const cameraRef   = useRef({ x: 0, y: 0, zoom: 1 })
-  const draggingRef = useRef<string | null>(null)
-  const panningRef  = useRef(false)
-  const lastPtrRef  = useRef({ x: 0, y: 0 })
+  const draggingRef   = useRef<string | null>(null)
+  const panningRef    = useRef(false)
+  const lastPtrRef    = useRef({ x: 0, y: 0 })
+  const pointersRef   = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const pinchDistRef  = useRef<number | null>(null)
   const hoveredRef  = useRef<string | null>(null)
   const selectedRef = useRef<Project | null>(null)
   const animRef     = useRef(0)
@@ -251,6 +265,19 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect) return
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    // Second finger down — cancel drag/pan, enter pinch mode
+    if (pointersRef.current.size >= 2) {
+      if (draggingRef.current) {
+        const n = nodeMapRef.current.get(draggingRef.current)
+        if (n) n.pinned = false
+        draggingRef.current = null
+      }
+      panningRef.current = false
+      return
+    }
+
     const world = toWorld(e.clientX - rect.left, e.clientY - rect.top)
     const node  = findNode(world.x, world.y)
     if (node) {
@@ -266,6 +293,28 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect) return
 
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    const ptrs = Array.from(pointersRef.current.values())
+
+    // Pinch-to-zoom (two fingers)
+    if (ptrs.length >= 2) {
+      const [a, b] = ptrs
+      const dist = Math.hypot(b.x - a.x, b.y - a.y)
+      if (pinchDistRef.current !== null) {
+        const factor = dist / pinchDistRef.current
+        const midX   = (a.x + b.x) / 2 - rect.left
+        const midY   = (a.y + b.y) / 2 - rect.top
+        const cam    = cameraRef.current
+        const newZ   = Math.max(0.3, Math.min(3, cam.zoom * factor))
+        cam.x    = midX - ((midX - cam.x) / cam.zoom) * newZ
+        cam.y    = midY - ((midY - cam.y) / cam.zoom) * newZ
+        cam.zoom = newZ
+        clampCamera(cam, rect.width, rect.height)
+      }
+      pinchDistRef.current = dist
+      return
+    }
+
     if (draggingRef.current) {
       const cam = cameraRef.current
       const dx  = (e.clientX - lastPtrRef.current.x) / cam.zoom
@@ -277,9 +326,11 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     }
 
     if (panningRef.current) {
-      cameraRef.current.x += e.clientX - lastPtrRef.current.x
-      cameraRef.current.y += e.clientY - lastPtrRef.current.y
-      lastPtrRef.current   = { x: e.clientX, y: e.clientY }
+      const cam = cameraRef.current
+      cam.x += e.clientX - lastPtrRef.current.x
+      cam.y += e.clientY - lastPtrRef.current.y
+      clampCamera(cam, rect.width, rect.height)
+      lastPtrRef.current = { x: e.clientX, y: e.clientY }
       return
     }
 
@@ -290,7 +341,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     canvasRef.current!.style.cursor = node ? "pointer" : "grab"
   }, [toWorld, findNode])
 
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = useCallback((e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId)
+    if (pointersRef.current.size < 2) pinchDistRef.current = null
     if (draggingRef.current) {
       const n = nodeMapRef.current.get(draggingRef.current)
       if (n) n.pinned = false
@@ -318,11 +371,12 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     const cam    = cameraRef.current
     const mx     = e.clientX - rect.left, my = e.clientY - rect.top
     const factor = e.deltaY > 0 ? 0.92 : 1.08
-    const newZ   = Math.max(0.15, Math.min(5, cam.zoom * factor))
+    const newZ   = Math.max(0.3, Math.min(3, cam.zoom * factor))
     // Zoom toward cursor position
     cam.x    = mx - ((mx - cam.x) / cam.zoom) * newZ
     cam.y    = my - ((my - cam.y) / cam.zoom) * newZ
     cam.zoom = newZ
+    clampCamera(cam, rect.width, rect.height)
   }, [])
 
   return (
@@ -333,7 +387,7 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
+        onPointerLeave={(e) => onPointerUp(e)}
         onClick={onClick}
         onWheel={onWheel}
       />
