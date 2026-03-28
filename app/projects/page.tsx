@@ -17,7 +17,7 @@ export default function Projects() {
   }, [selected])
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "64px 48px 96px" }}>
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 48px 24px", height: "100vh", boxSizing: "border-box", overflow: "hidden" }}>
       <h1 className="font-display text-3xl font-semibold text-[var(--foreground)] mb-2">
         Projects
       </h1>
@@ -29,7 +29,7 @@ export default function Projects() {
         </p>
 
         {/* Master-detail: graph shrinks left, detail slides in right */}
-        <div style={{ display: "flex", height: 620 }}>
+        <div style={{ display: "flex", height: "calc(100vh - 200px)" }}>
 
           {/* Graph box — full width by default, half width when a project is selected */}
           <div style={{
@@ -137,7 +137,7 @@ export default function Projects() {
 
         {/* Graph */}
         <div style={{
-          width: "100%", height: "65vh",
+          width: "100%", height: "calc(100vh - 180px)",
           borderRadius: 16, overflow: "hidden",
           border: "1px solid rgba(0,0,0,0.08)",
         }}>
