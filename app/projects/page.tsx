@@ -94,7 +94,7 @@ export default function Projects() {
                   {/* Image */}
                   <div style={{
                     position: "relative", width: "100%", aspectRatio: "16/9",
-                    borderRadius: 10, overflow: "hidden", background: "rgba(0,0,0,0.05)",
+                    borderRadius: 10, overflow: "hidden", background: "#060d14",
                     flexShrink: 0,
                   }}>
                     <Image
@@ -102,7 +102,7 @@ export default function Projects() {
                       alt={selected.name}
                       fill
                       sizes="(max-width: 1200px) 50vw, 576px"
-                      className="object-cover"
+                      className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"}
                     />
                   </div>
 
@@ -206,8 +206,8 @@ export default function Projects() {
               )}
 
               {/* Image */}
-              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: 10, overflow: "hidden", background: "rgba(0,0,0,0.05)", flexShrink: 0 }}>
-                <Image src={selected.image} alt={selected.name} fill sizes="100vw" className="object-cover" />
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: 10, overflow: "hidden", background: "#060d14", flexShrink: 0 }}>
+                <Image src={selected.image} alt={selected.name} fill sizes="100vw" className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"} />
               </div>
 
               {/* Description */}

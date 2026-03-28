@@ -3,6 +3,7 @@ export type Project = {
   name: string
   description: string
   image: string
+  imageStyle?: "cover" | "contain"   // default "cover"; use "contain" for portrait images
   tags: string[]
   github?: string
   live?: string
@@ -31,6 +32,7 @@ export const projects: Project[] = [
     name: "Alfred",
     description: "Personal AI assistant and coding collaborator built on Claude Code — with persistent memory, self-improvement, and a Telegram interface.",
     image: "/images/alfred.jpg",
+    imageStyle: "contain",
     tags: ["Claude Code", "Python", "Memory Systems"],
     featured: true,
   },
@@ -49,6 +51,7 @@ export const projects: Project[] = [
     name: "Weatherbot",
     description: "Location specific Telegram weather bot for Singapore — daily forecasts, UV index alerts, and scheduled morning push notifications.",
     image: "/images/weatherbot.jpg",
+    imageStyle: "contain",
     tags: ["Python", "Telegram API", "Data.gov.sg"],
     featured: true,
   },
