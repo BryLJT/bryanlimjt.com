@@ -22,6 +22,12 @@ export default function About() {
           that doesn&apos;t exist yet and making it real — a working system, a tool someone actually uses,
           something that solves a problem it wasn&apos;t solving before. That&apos;s what pulls me back.
         </p>
+        <p> 
+          Aside from building, I love to gym and exercise in my free time. Growing up I was always the skinny kid
+          so it means a lot to me to be able to change that and I&apos;m proud of the progress I&apos;ve made.
+          It has given me a new sense of self confidence, as well as discipline and consistency that I try to apply
+          to other areas of my life.
+        </p>
         <p>
           I believe now (while young) is the time to sprint. Learn, do, fail, try again.
         </p>
