@@ -15,7 +15,7 @@ export default function SchedulingButton() {
     }
 
     function initButton() {
-      const cal = (window as Record<string, unknown>).calendar as {
+      const cal = (window as unknown as Record<string, unknown>).calendar as {
         schedulingButton: { load: (opts: Record<string, unknown>) => void }
       } | undefined
       if (ref.current && cal?.schedulingButton) {
