@@ -159,6 +159,7 @@ export default function Globe() {
         onPointerUp={handlePointerUp}
         onPointerOut={handlePointerOut}
         onPointerMove={handlePointerMove}
+        onPointerCancel={handlePointerUp}
         style={{
           position: "absolute",
           top: "50%",
@@ -167,6 +168,7 @@ export default function Globe() {
           width:  displaySize,
           height: displaySize,
           cursor: "grab",
+          touchAction: "none",
         }}
       />
 
