@@ -4,6 +4,7 @@ import "./globals.css"
 import NavBar from "@/components/NavBar"
 import Footer from "@/components/Footer"
 import PageTransitionWrapper from "@/components/PageTransitionWrapper"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </PageTransitionWrapper>
         <Footer />
+        <SpeedInsights />
       </body>
     </html>
   )
