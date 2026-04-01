@@ -111,11 +111,11 @@ export default function CertificationsCarousel() {
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
       >
-        {/* Left arrow — desktop only */}
+        {/* Left arrow */}
         <button
           onClick={prev}
           aria-label="Previous certification"
-          className="hidden sm:flex absolute left-8 z-10 w-10 h-10 rounded-full items-center justify-center text-xl transition-colors"
+          className="flex absolute left-8 z-10 w-10 h-10 rounded-full items-center justify-center text-xl transition-colors"
           style={{ background: "rgba(0,0,0,0.07)", color: "#555" }}
           onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.12)")}
           onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.07)")}
@@ -150,11 +150,11 @@ export default function CertificationsCarousel() {
           />
         </div>
 
-        {/* Right arrow — desktop only */}
+        {/* Right arrow */}
         <button
           onClick={next}
           aria-label="Next certification"
-          className="hidden sm:flex absolute right-8 z-10 w-10 h-10 rounded-full items-center justify-center text-xl transition-colors"
+          className="flex absolute right-8 z-10 w-10 h-10 rounded-full items-center justify-center text-xl transition-colors"
           style={{ background: "rgba(0,0,0,0.07)", color: "#555" }}
           onMouseEnter={e => (e.currentTarget.style.background = "rgba(0,0,0,0.12)")}
           onMouseLeave={e => (e.currentTarget.style.background = "rgba(0,0,0,0.07)")}
