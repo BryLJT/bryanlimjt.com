@@ -37,6 +37,6 @@ export const certifications: Certification[] = [
     badge: "/images/badges/alteryx-core.png",
     color: "#0078C8",
     description:
-      "Validates proficiency in Alteryx Designer for self-service data analytics — covering data blending, ETL workflows, spatial analytics, and predictive modelling. Applied in reconciliation and pipeline work during internship at PwC.",
+      "Validates proficiency in Alteryx Designer for self-service data analytics — covering data blending, ETL workflows, and data analytics.",
   },
 ]
