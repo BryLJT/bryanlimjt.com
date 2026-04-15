@@ -4,10 +4,24 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectGraph from "@/components/ProjectGraph"
 import { Project } from "@/data/projects"
+import { Certification } from "@/data/certifications"
 
 export default function Projects() {
   const [selected, setSelected] = useState<Project | null>(null)
+  const [selectedCert, setSelectedCert] = useState<Certification | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Only one panel open at a time — selecting one clears the other
+  const handleSelectProject = (proj: Project | null) => {
+    setSelected(proj)
+    setSelectedCert(null)
+  }
+  const handleSelectCert = (cert: Certification | null) => {
+    setSelectedCert(cert)
+    setSelected(null)
+  }
+
+  const anySelected = selected || selectedCert
 
   // Detect mobile breakpoint — single <ProjectGraph> mounts in only one layout at a time
   useEffect(() => {
@@ -33,9 +47,9 @@ export default function Projects() {
         {/* Master-detail: graph shrinks left, detail slides in right */}
         <div style={{ display: "flex", height: "calc(100vh - 200px)" }}>
 
-          {/* Graph box — full width by default, half width when a project is selected */}
+          {/* Graph box — full width by default, half width when something is selected */}
           <div style={{
-            width: selected ? "50%" : "100%",
+            width: anySelected ? "50%" : "100%",
             flexShrink: 0,
             height: "100%",
             borderRadius: 16,
@@ -43,12 +57,19 @@ export default function Projects() {
             border: "1px solid rgba(0,0,0,0.08)",
             transition: "width 0.4s ease",
           }}>
-            {!isMobile && <ProjectGraph onSelect={setSelected} selected={selected} />}
+            {!isMobile && (
+              <ProjectGraph
+                onSelect={handleSelectProject}
+                selected={selected}
+                onSelectCert={handleSelectCert}
+                selectedCert={selectedCert}
+              />
+            )}
           </div>
 
           {/* Detail panel — clips to 0 when nothing selected, expands on click */}
           <div style={{
-            width: selected ? "50%" : "0%",
+            width: anySelected ? "50%" : "0%",
             flexShrink: 0,
             height: "100%",
             overflow: "hidden",
@@ -64,9 +85,11 @@ export default function Projects() {
               paddingBottom: 4,
               overflowY: "auto",
               boxSizing: "border-box",
-              opacity: selected ? 1 : 0,
+              opacity: anySelected ? 1 : 0,
               transition: "opacity 0.25s ease 0.2s",
             }}>
+
+              {/* ── Project detail ── */}
               {selected && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
@@ -131,6 +154,52 @@ export default function Projects() {
 
                 </div>
               )}
+
+              {/* ── Certification detail ── */}
+              {selectedCert && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+
+                  {/* Issuer + title */}
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: selectedCert.color, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>
+                      {selectedCert.issuer}
+                    </p>
+                    <h2 className="font-display" style={{ fontSize: 26, fontWeight: 600, color: "var(--foreground)", lineHeight: 1.2, margin: 0 }}>
+                      {selectedCert.name}
+                    </h2>
+                  </div>
+
+                  {/* Badge */}
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <div style={{
+                      position: "relative", width: 160, height: 160,
+                      borderRadius: 16, overflow: "hidden",
+                      background: selectedCert.color + "1a",
+                    }}>
+                      <Image
+                        src={selectedCert.badge}
+                        alt={selectedCert.name}
+                        fill
+                        sizes="160px"
+                        className="object-contain"
+                        style={{ padding: 8 }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+                    Issued {selectedCert.date}
+                  </p>
+
+                  {/* Description */}
+                  <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
+                    {selectedCert.description}
+                  </p>
+
+                </div>
+              )}
+
             </div>
           </div>
 
@@ -149,13 +218,20 @@ export default function Projects() {
           borderRadius: 16, overflow: "hidden",
           border: "1px solid rgba(0,0,0,0.08)",
         }}>
-          {isMobile && <ProjectGraph onSelect={setSelected} selected={selected} />}
+          {isMobile && (
+            <ProjectGraph
+              onSelect={handleSelectProject}
+              selected={selected}
+              onSelectCert={handleSelectCert}
+              selectedCert={selectedCert}
+            />
+          )}
         </div>
 
         {/* Backdrop */}
-        {selected && (
+        {anySelected && (
           <div
-            onClick={() => setSelected(null)}
+            onClick={() => { setSelected(null); setSelectedCert(null) }}
             style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 49 }}
           />
         )}
@@ -166,17 +242,18 @@ export default function Projects() {
           background: "var(--background)",
           borderRadius: "20px 20px 0 0",
           boxShadow: "0 -4px 32px rgba(0,0,0,0.2)",
-          transform: selected ? "translateY(0)" : "translateY(100%)",
+          transform: anySelected ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
           maxHeight: "72vh", overflowY: "auto",
           padding: "0 24px 48px",
-          pointerEvents: selected ? "auto" : "none",
+          pointerEvents: anySelected ? "auto" : "none",
         }}>
           {/* Handle bar */}
           <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 8px" }}>
             <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(128,128,128,0.3)" }} />
           </div>
 
+          {/* ── Project detail (mobile) ── */}
           {selected && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
@@ -238,6 +315,59 @@ export default function Projects() {
                   </span>
                 ))}
               </div>
+
+            </div>
+          )}
+
+          {/* ── Certification detail (mobile) ── */}
+          {selectedCert && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+              {/* Title + close */}
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: selectedCert.color, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>
+                    {selectedCert.issuer}
+                  </p>
+                  <h2 className="font-display" style={{ fontSize: 22, fontWeight: 600, color: "var(--foreground)", margin: 0, lineHeight: 1.2 }}>
+                    {selectedCert.name}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setSelectedCert(null)}
+                  style={{ flexShrink: 0, fontSize: 18, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Badge */}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <div style={{
+                  position: "relative", width: 140, height: 140,
+                  borderRadius: 14, overflow: "hidden",
+                  background: selectedCert.color + "1a",
+                }}>
+                  <Image
+                    src={selectedCert.badge}
+                    alt={selectedCert.name}
+                    fill
+                    sizes="140px"
+                    className="object-contain"
+                    style={{ padding: 8 }}
+                  />
+                </div>
+              </div>
+
+              {/* Date */}
+              <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+                Issued {selectedCert.date}
+              </p>
+
+              {/* Description */}
+              <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
+                {selectedCert.description}
+              </p>
 
             </div>
           )}

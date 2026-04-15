@@ -3,10 +3,13 @@
 import { useRef, useEffect, useCallback, useMemo } from "react"
 import { buildGraphData, GraphNode, GraphLink } from "@/data/graph"
 import { projects, Project } from "@/data/projects"
+import { certifications, Certification } from "@/data/certifications"
 
 type Props = {
   onSelect?: (project: Project | null) => void
   selected?: Project | null
+  onSelectCert?: (cert: Certification | null) => void
+  selectedCert?: Certification | null
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -49,7 +52,7 @@ function clampCamera(cam: { x: number; y: number; zoom: number }, w: number, h: 
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function ProjectGraph({ onSelect, selected: selectedProp = null }: Props) {
+export default function ProjectGraph({ onSelect, selected: selectedProp = null, onSelectCert, selectedCert: selectedCertProp = null }: Props) {
   const GRAPH_DATA  = useMemo(() => buildGraphData(), [])
   const canvasRef   = useRef<HTMLCanvasElement>(null)
   const nodesRef    = useRef<SimNode[]>([])
@@ -61,12 +64,14 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
   const lastPtrRef    = useRef({ x: 0, y: 0 })
   const pointersRef   = useRef<Map<number, { x: number; y: number }>>(new Map())
   const pinchDistRef  = useRef<number | null>(null)
-  const hoveredRef  = useRef<string | null>(null)
-  const selectedRef = useRef<Project | null>(null)
-  const animRef     = useRef(0)
+  const hoveredRef      = useRef<string | null>(null)
+  const selectedRef     = useRef<Project | null>(null)
+  const selectedCertRef = useRef<Certification | null>(null)
+  const animRef         = useRef(0)
 
-  // Sync selected prop into ref — animation loop reads ref, no restart needed
+  // Sync selected props into refs — animation loop reads refs, no restart needed
   useEffect(() => { selectedRef.current = selectedProp ?? null }, [selectedProp])
+  useEffect(() => { selectedCertRef.current = selectedCertProp ?? null }, [selectedCertProp])
 
   // ── Init nodes ───────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -202,8 +207,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
       }
 
       // Nodes
-      const hov = hoveredRef.current
-      const sel = selectedRef.current
+      const hov     = hoveredRef.current
+      const sel     = selectedRef.current
+      const selCert = selectedCertRef.current
 
       for (const node of nodes) {
         const { x, y } = node
@@ -211,7 +217,7 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
         const isProject = node.type === "project"
         const isCert    = node.type === "certification"
         const isHov     = node.id === hov
-        const isSel     = isProject && sel?.id === node.projectId
+        const isSel     = (isProject && sel?.id === node.projectId) || (isCert && selCert?.id === node.id)
         const color     = nodeColor(node.type)
 
         // Glow (project + cert only)
@@ -357,12 +363,19 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null }
     if (!rect) return
     const world = toWorld(e.clientX - rect.left, e.clientY - rect.top)
     const node  = findNode(world.x, world.y)
-    if (!node || node.type !== "project") return
-    const proj  = projects.find(p => p.id === node.projectId) ?? null
-    if (!proj) return
-    // Toggle: clicking the selected node again deselects it
-    onSelect?.(selectedRef.current?.id === proj.id ? null : proj)
-  }, [toWorld, findNode, onSelect])
+    if (!node) return
+
+    if (node.type === "project") {
+      const proj = projects.find(p => p.id === node.projectId) ?? null
+      if (!proj) return
+      // Toggle: clicking the selected node again deselects it
+      onSelect?.(selectedRef.current?.id === proj.id ? null : proj)
+    } else if (node.type === "certification") {
+      const cert = certifications.find(c => c.id === node.id) ?? null
+      if (!cert) return
+      onSelectCert?.(selectedCertRef.current?.id === cert.id ? null : cert)
+    }
+  }, [toWorld, findNode, onSelect, onSelectCert])
 
   // Wheel zoom — must be { passive: false } so preventDefault actually works.
   // React 18 registers synthetic wheel listeners as passive, which silently ignores
