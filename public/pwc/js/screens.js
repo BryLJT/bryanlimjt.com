@@ -1,20 +1,157 @@
 import { renderSpiderChart } from './spider-chart.js';
 
+const PILLAR_BC_LABELS = ['Productivity', 'Efficiency', 'Growth & Innovation', 'Compliance', 'Responsibility', 'Adoption'];
+
+function renderBreadcrumb({ pillarIndex }) {
+  const items = PILLAR_BC_LABELS.map((label, i) => {
+    const state = i < pillarIndex ? 'done' : i === pillarIndex ? 'active' : 'upcoming';
+    return `<div class="bc__item bc__item--${state}">
+      <div class="bc__marker">${i + 1}</div>
+      <div class="bc__label">${label}</div>
+    </div>`;
+  }).join('<div class="bc__sep"></div>');
+  return `<aside class="breadcrumb">${items}</aside>`;
+}
+
 export function renderWelcome() {
+  return `
+    <section class="screen welcome-screen">
+
+      <div class="welcome__left">
+
+        <div class="welcome__orange-hero">
+          <span class="welcome__eyebrow">PwC · Data Governance Business Value Calculator · APAC</span>
+          <h1 class="welcome__headline">Your data has a <em>hidden cost.</em></h1>
+          <p class="welcome__desc">Find out exactly how much your organisation is losing to poor data governance — across productivity, compliance, and growth.</p>
+        </div>
+
+        <div class="welcome__dark-content">
+          <div class="welcome__stats">
+            <div class="welcome__stat">
+              <span class="welcome__stat-num">6</span>
+              <span class="welcome__stat-label">Governance pillars assessed</span>
+            </div>
+            <div class="welcome__stat">
+              <span class="welcome__stat-num">$M</span>
+              <span class="welcome__stat-label">Annual value at risk, quantified</span>
+            </div>
+            <div class="welcome__stat">
+              <span class="welcome__stat-num">3</span>
+              <span class="welcome__stat-label">Priority actions, personalised</span>
+            </div>
+          </div>
+
+          <div class="wf-section">
+            <div class="wf-section__num">01</div>
+            <h3 class="wf-section__title">What is Data Governance?</h3>
+            <p class="wf-section__body">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently — across every team, every decision, every quarter.</p>
+          </div>
+
+          <div class="wf-section">
+            <div class="wf-section__num">02</div>
+            <h3 class="wf-section__title">Why it belongs on the board agenda</h3>
+            <div class="wf-points">
+              <div class="wf-point"><span class="wf-point__dot"></span><span>Regulators across APAC are tightening data requirements — from PDPA to sector-specific mandates. The cost of non-compliance is rising.</span></div>
+              <div class="wf-point"><span class="wf-point__dot"></span><span>AI investment is accelerating — but AI is only as good as the data it runs on. Poor governance limits returns before you start.</span></div>
+              <div class="wf-point"><span class="wf-point__dot"></span><span>Data breaches carry reputational and financial costs that dwarf the investment in prevention.</span></div>
+              <div class="wf-point"><span class="wf-point__dot"></span><span>Organisations with mature data governance consistently outperform peers on decision speed, accuracy, and competitive agility.</span></div>
+            </div>
+          </div>
+
+          <div class="wf-section">
+            <div class="wf-section__num">03</div>
+            <h3 class="wf-section__title">How we quantify the gap</h3>
+            <p class="wf-section__body">We translate governance gaps into dollar figures using a consistent ROI methodology — your organisation's headcount, estimated annual labour cost, and sector-specific multipliers, applied against your responses across six governance pillars. The output is an indicative annual value at risk: not a precise forecast, but a credible, defensible signal of where to act and how urgently.</p>
+          </div>
+
+          <div class="wf-section">
+            <div class="wf-section__num">04</div>
+            <h3 class="wf-section__title">The assessment framework</h3>
+            <p class="wf-section__body wf-section__body--mb">Six pillars capture the full cost of a governance gap — from day-to-day productivity drag through to strategic and regulatory exposure.</p>
+            <div class="wf-pillars">
+              <div class="wf-pillar"><span class="wf-pillar__num">1</span><div><div class="wf-pillar__name">Productivity</div><div class="wf-pillar__desc">Time lost finding, validating and reconciling data before it can be used</div></div></div>
+              <div class="wf-pillar"><span class="wf-pillar__num">2</span><div><div class="wf-pillar__name">Efficiency</div><div class="wf-pillar__desc">Manual processes and data handoffs that could and should be automated</div></div></div>
+              <div class="wf-pillar"><span class="wf-pillar__num">3</span><div><div class="wf-pillar__name">Growth &amp; Innovation</div><div class="wf-pillar__desc">Revenue opportunities missed because data isn't accessible, trusted, or used strategically</div></div></div>
+              <div class="wf-pillar"><span class="wf-pillar__num">4</span><div><div class="wf-pillar__name">Control / Compliance</div><div class="wf-pillar__desc">Audit exposure and the escalating cost of responding to regulatory requirements</div></div></div>
+              <div class="wf-pillar"><span class="wf-pillar__num">5</span><div><div class="wf-pillar__name">Responsibility</div><div class="wf-pillar__desc">Unclear accountability when data quality issues or incidents arise</div></div></div>
+              <div class="wf-pillar"><span class="wf-pillar__num">6</span><div><div class="wf-pillar__name">Adoption &amp; Literacy</div><div class="wf-pillar__desc">Decisions made on instinct rather than the data your organisation already has</div></div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="welcome__right">
+        <div class="welcome__form-card">
+          <div class="welcome__form-header">
+            <span class="welcome__form-dot"></span>
+            <span class="welcome__form-title">Access your diagnostic</span>
+          </div>
+          <p class="welcome__form-sub">Enter your work email to receive your personalised report and recommendations.</p>
+          <input type="email" id="welcome-email" placeholder="you@company.com" required class="welcome__input" />
+          <button class="btn btn--primary welcome__cta" id="welcome-begin" disabled>Begin assessment →</button>
+          <p class="welcome__disclaimer">Takes 5 minutes · 500+ employees · Based on Gartner, IDC &amp; Forrester benchmarks</p>
+        </div>
+      </div>
+
+    </section>
+  `;
+}
+
+export function renderSizingScreen({ responses }) {
+  function opt(field, value, label, sub) {
+    const sel = String(responses[field]) === String(value) ? 'sz-opt--selected' : '';
+    const subHtml = sub ? `<span class="sz-opt__sub">${sub}</span>` : '';
+    return `<button class="sz-opt ${sel}" data-field="${field}" data-value="${value}"><span class="sz-opt__main">${label}</span>${subHtml}</button>`;
+  }
   return `
     <section class="screen">
       <div class="screen__inner">
-        <p class="eyebrow">Data Governance Diagnostic</p>
-        <h1 class="question">Find out what your data is really worth to you.</h1>
-        <p class="subtitle">A 5-minute self-assessment that surfaces where your organisation is losing value to poor data governance.</p>
-        <input type="email" id="welcome-email" placeholder="Your work email" required style="width:100%;padding:14px 18px;border:1.5px solid var(--option-border);border-radius:8px;background:var(--option-bg);font-family:inherit;font-size:14px;margin-bottom:24px" />
-        <button class="btn btn--primary" id="welcome-begin" disabled>Begin →</button>
+        <p class="eyebrow">About Your Organisation</p>
+        <h2 class="question">A few quick details before we begin.</h2>
+
+        <div class="sz-group">
+          <p class="sz-group__label">Headcount</p>
+          <div class="sz-row sz-row--4">
+            ${opt('headcount','<500','Under 500')}
+            ${opt('headcount','500-2000','500 – 2,000')}
+            ${opt('headcount','2000-10000','2,000 – 10,000')}
+            ${opt('headcount','10000+','10,000+')}
+          </div>
+        </div>
+
+        <div class="sz-group">
+          <p class="sz-group__label">Industry</p>
+          <div class="sz-row sz-row--3">
+            ${opt('sector','financial-services','Financial Services')}
+            ${opt('sector','healthcare','Healthcare')}
+            ${opt('sector','energy-utilities','Energy & Utilities')}
+            ${opt('sector','government','Government')}
+            ${opt('sector','retail-consumer','Retail & Consumer')}
+            ${opt('sector','other','Other')}
+          </div>
+        </div>
+
+        <div class="sz-group">
+          <p class="sz-group__label">Data Management Maturity</p>
+          <div class="sz-row sz-row--4">
+            ${opt('maturity','ad-hoc','Ad hoc','No formal practices')}
+            ${opt('maturity','developing','Developing','Some policies, inconsistent')}
+            ${opt('maturity','defined','Defined','Policies largely followed')}
+            ${opt('maturity','advanced','Advanced','Governance embedded')}
+          </div>
+        </div>
+
+        <div class="nav nav--fixed">
+          <button class="btn btn--ghost" id="nav-back">← Back</button>
+          <button class="btn btn--primary" id="nav-next" disabled>Next →</button>
+        </div>
       </div>
     </section>
   `;
 }
 
-export function renderBoxQuestion({ eyebrow, question, options, selectedValue }) {
+export function renderBoxQuestion({ eyebrow, question, options, selectedValue, breadcrumb }) {
   const optionsHtml = options.map(opt => `
     <button class="option ${opt.value === selectedValue ? 'option--selected' : ''}" data-value="${opt.value}">
       <div class="option__label">${opt.label}</div>
@@ -23,13 +160,14 @@ export function renderBoxQuestion({ eyebrow, question, options, selectedValue })
   `).join('');
 
   return `
+    ${breadcrumb ? renderBreadcrumb(breadcrumb) : ''}
     <section class="screen">
       <div class="screen__inner">
         <p class="eyebrow">${eyebrow}</p>
         <h2 class="question">${question}</h2>
         <p class="subtitle">Select the option that best reflects your organisation.</p>
         ${optionsHtml}
-        <div class="nav">
+        <div class="nav nav--fixed">
           <button class="btn btn--ghost" id="nav-back">← Back</button>
           <button class="btn btn--primary" id="nav-next" disabled>Next →</button>
         </div>
@@ -38,30 +176,7 @@ export function renderBoxQuestion({ eyebrow, question, options, selectedValue })
   `;
 }
 
-export function renderTileQuestion({ eyebrow, question, options, selectedValue }) {
-  const tilesHtml = options.map(opt => `
-    <button class="tile ${opt.value === selectedValue ? 'tile--selected' : ''}" data-value="${opt.value}">
-      ${opt.label}
-    </button>
-  `).join('');
-
-  return `
-    <section class="screen">
-      <div class="screen__inner">
-        <p class="eyebrow">${eyebrow}</p>
-        <h2 class="question">${question}</h2>
-        <p class="subtitle">Select the option that best describes your organisation.</p>
-        <div class="tiles">${tilesHtml}</div>
-        <div class="nav">
-          <button class="btn btn--ghost" id="nav-back">← Back</button>
-          <button class="btn btn--primary" id="nav-next" disabled>Next →</button>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-export function renderSliderQuestion({ eyebrow, question, descriptors, currentValue }) {
+export function renderSliderQuestion({ eyebrow, question, descriptors, currentValue, breadcrumb }) {
   const value = currentValue ?? 3;
   const levelsHtml = descriptors.map(d => `
     <div class="slider-level ${d.num === value ? 'slider-level--active' : ''}" data-value="${d.num}">
@@ -72,6 +187,7 @@ export function renderSliderQuestion({ eyebrow, question, descriptors, currentVa
   `).join('');
 
   return `
+    ${breadcrumb ? renderBreadcrumb(breadcrumb) : ''}
     <section class="screen">
       <div class="screen__inner">
         <p class="eyebrow">${eyebrow}</p>
@@ -81,7 +197,7 @@ export function renderSliderQuestion({ eyebrow, question, descriptors, currentVa
           <input type="range" min="1" max="5" value="${value}" id="slider-input" />
           <div class="slider-levels" id="slider-levels">${levelsHtml}</div>
         </div>
-        <div class="nav">
+        <div class="nav nav--fixed">
           <button class="btn btn--ghost" id="nav-back">← Back</button>
           <button class="btn btn--primary" id="nav-next">Next →</button>
         </div>
@@ -105,9 +221,15 @@ export function renderCalculating() {
 // --- Scorecard + Recommendations helpers ---
 
 export function fmtCurrency(n) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(0)}`;
+  if (n >= 1_000_000) {
+    const m = Math.round(n / 100_000) / 10;
+    return `$${m.toFixed(1)}M`;
+  }
+  if (n >= 1_000) {
+    const k = Math.round(n / 10_000) * 10;
+    return `$${k}K`;
+  }
+  return `$${Math.round(n)}`;
 }
 
 function riskTier(gapScore) {
@@ -123,7 +245,7 @@ function riskLabel(tier) {
 const PILLAR_LABELS_FULL = {
   productivity: 'Productivity',
   efficiency: 'Efficiency',
-  growth: 'Growth / Innovation',
+  growth: 'Growth & Innovation',
   compliance: 'Control / Compliance',
   responsibility: 'Responsibility',
   adoption: 'Adoption / Literacy',
@@ -137,7 +259,7 @@ export function renderScorecard({ roi, maturityLabel, sectorLabel, headcountLabe
     const tier = riskTier(data.gapScore);
     return `
       <div class="pillar-row pillar-row--${tier}">
-        <div>
+        <div class="pillar-row__left">
           <div class="pillar-row__label">${PILLAR_LABELS_FULL[key]}</div>
           <div class="pillar-row__risk">${riskLabel(tier)}</div>
         </div>
@@ -265,7 +387,6 @@ export function renderRecommendations({ roi }) {
         </div>
         <div class="recommendations__body">${cardsHtml}</div>
         <div class="recommendations__secondary-actions">
-          <button class="btn btn--ghost" id="download-report">Download Report</button>
           <button class="btn btn--ghost" id="start-over">Start Over</button>
         </div>
         <div class="recommendations__cta-footer">
