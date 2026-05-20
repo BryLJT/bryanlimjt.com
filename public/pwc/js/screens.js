@@ -307,44 +307,50 @@ export function renderScorecard({ roi, maturityLabel, sectorLabel, headcountLabe
 const RECOMMENDATIONS_BY_PILLAR = {
   productivity: {
     issue: 'Teams are spending significant time finding, validating and reconciling data — creating a compounding drag on output across the organisation.',
+    recommendation: 'Establish a single authoritative data layer with designated ownership and automated quality checks.',
     actions: [
-      'Establish a single trusted data source with defined ownership and refresh cadence.',
-      'Automate data validation workflows to reduce manual reconciliation effort.',
+      'Appoint domain data owners and publish one trusted source per high-use dataset.',
+      'Automate validation at ingestion to eliminate manual reconciliation effort.',
     ],
   },
   efficiency: {
     issue: 'Manual and fragmented data processes are slowing down operations — workflows that could be automated are still handled by people, at scale.',
+    recommendation: 'Map, prioritise, and systematically automate your highest-frequency data workflows.',
     actions: [
-      'Map and prioritise high-frequency data processes for automation or standardisation.',
-      'Introduce data pipeline tooling to reduce handoff friction between teams.',
+      'Inventory manual data workflows and rank by frequency and time cost.',
+      'Introduce pipeline tooling to reduce handoff friction between teams.',
     ],
   },
   growth: {
     issue: 'Data is not being used as a strategic asset — opportunities for revenue growth and market differentiation are slipping past unrecognised.',
+    recommendation: 'Align data assets directly to commercial priorities and embed analytics into key decisions.',
     actions: [
-      'Stand up an analytics capability that aligns data assets to commercial priorities.',
-      'Embed data-driven scoring into key decision processes (pricing, customer, product).',
+      'Stand up an analytics capability tied to pricing, customer, and product decisions.',
+      'Identify and productise two or three high-value datasets within the next quarter.',
     ],
   },
   compliance: {
     issue: 'Data governance controls are inconsistent across business units, creating audit exposure and increasing the cost of regulatory response.',
+    recommendation: 'Implement a classification framework with consistent access controls and automated audit trails.',
     actions: [
-      'Define a data classification framework and apply access controls consistently.',
-      'Implement automated monitoring and audit trails for high-sensitivity data assets.',
+      'Define data sensitivity tiers and enforce access controls across all systems.',
+      'Deploy automated monitoring and audit logging for high-sensitivity data assets.',
     ],
   },
   responsibility: {
     issue: 'When data issues arise, accountability is unclear — issues persist longer than they should and recur across the organisation.',
+    recommendation: 'Formalise data ownership roles by business domain and establish incident response protocols.',
     actions: [
-      'Establish formal data ownership roles aligned to business domains.',
-      'Define and rehearse incident response playbooks for data quality and breach scenarios.',
+      'Assign accountable data owners to each business domain with clear escalation paths.',
+      'Define and rehearse data quality and breach incident playbooks.',
     ],
   },
   adoption: {
     issue: 'Data literacy is uneven — too many decisions still rely on instinct rather than the data you already have.',
+    recommendation: 'Build a structured data literacy programme and embed self-serve analytics into daily workflows.',
     actions: [
-      'Roll out a structured data literacy programme tied to role-based competencies.',
-      'Embed self-serve analytics tooling into the everyday workflow of business teams.',
+      'Roll out role-based data literacy training with measurable competency targets.',
+      'Deploy self-serve analytics tooling integrated into everyday team workflows.',
     ],
   },
 };
@@ -395,6 +401,104 @@ export function renderRecommendations({ roi }) {
             <div class="recommendations__cta-sub">PwC's Data Governance Advisory team works with APAC organisations to turn these findings into action.</div>
           </div>
           <button class="btn btn--primary" id="talk-to-pwc">Talk to PwC →</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+export function renderReport({ roi, maturityLabel, sectorLabel, headcountLabel }) {
+  const pillarsSorted = Object.entries(roi.pillarBreakdown)
+    .sort(([, a], [, b]) => b.value - a.value);
+
+  const maturityScores = {};
+  for (const [key, data] of Object.entries(roi.pillarBreakdown)) {
+    maturityScores[key] = Math.max(0.1, 1 - data.gapScore);
+  }
+
+  const pillarRowsHtml = pillarsSorted.map(([key, data], i) => {
+    const tier = riskTier(data.gapScore);
+    const rankHtml = i < 3
+      ? `<span class="pillar-row__rank">${i + 1}</span>`
+      : '';
+    return `
+      <div class="pillar-row pillar-row--${tier}${i < 3 ? ' pillar-row--callout' : ''}">
+        <div class="pillar-row__left">
+          <div class="pillar-row__label-row">
+            ${rankHtml}
+            <span class="pillar-row__label">${PILLAR_LABELS_FULL[key]}</span>
+          </div>
+          <div class="pillar-row__risk">${riskLabel(tier)}</div>
+        </div>
+        <div class="pillar-row__value">${fmtCurrency(data.value)}</div>
+      </div>
+    `;
+  }).join('');
+
+  const topThree = pillarsSorted.slice(0, 3);
+  const priorityCardsHtml = topThree.map(([key, data], i) => {
+    const tier = riskTier(data.gapScore);
+    const rec = RECOMMENDATIONS_BY_PILLAR[key];
+    return `
+      <div class="priority-card priority-card--${tier}">
+        <div class="priority-card__head">
+          <span class="priority-card__num">${i + 1}</span>
+          <span class="priority-card__name">${PILLAR_LABELS_FULL[key]}</span>
+          <span class="priority-card__badge">${tier === 'high' ? 'High Risk' : 'Moderate'}</span>
+        </div>
+        <div class="priority-card__leakage">
+          <span class="priority-card__leakage-label">Attributed leakage</span>
+          <strong class="priority-card__leakage-num">${fmtCurrency(data.value)}</strong>
+        </div>
+        <div class="priority-card__body">
+          <p class="priority-card__issue">${rec.issue}</p>
+          <div class="priority-card__rec">${rec.recommendation}</div>
+          <ul class="priority-card__steps">
+            ${rec.actions.map(a => `<li>${a}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <section class="screen report-screen">
+      <div class="report">
+        <div class="report__header">
+          <div>
+            <div class="report__eyebrow">Estimated Annual Value Leakage</div>
+            <div class="report__total">${fmtCurrency(roi.totalValueAtRisk)}</div>
+            <div class="report__range">Indicative range: ${fmtCurrency(roi.displayRange.low)} – ${fmtCurrency(roi.displayRange.high)}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="scorecard__maturity-label">Overall Maturity</div>
+            <div class="scorecard__maturity-badge">${maturityLabel}</div>
+            <div style="font-size:10px;color:#888;margin-top:6px">${sectorLabel} · ${headcountLabel} employees</div>
+          </div>
+        </div>
+        <div class="report__overview">
+          <div>${renderSpiderChart(maturityScores)}</div>
+          <div class="report__pillars">
+            <div class="scorecard__pillars-title">Value leakage by pillar</div>
+            ${pillarRowsHtml}
+          </div>
+        </div>
+        <div class="report__priorities">
+          <div class="report__priorities-title">Top 3 priority areas</div>
+          <div class="report__cards">${priorityCardsHtml}</div>
+        </div>
+        <div class="report__footer">
+          <button class="report__methodology" id="methodology-link">Based on Gartner, IDC &amp; Forrester benchmarks · View methodology</button>
+          <div class="report__cta-row">
+            <div>
+              <div class="recommendations__cta-text">Ready to close the gap?</div>
+              <div class="recommendations__cta-sub">PwC's Data Governance Advisory team works with APAC organisations to turn these findings into action.</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-shrink:0">
+              <button class="btn btn--ghost report__start-over" id="start-over">Start Over</button>
+              <button class="btn btn--primary" id="talk-to-pwc">Talk to PwC →</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

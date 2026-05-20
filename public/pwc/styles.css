@@ -839,3 +839,242 @@ html, body {
   border-color: var(--pwc-orange);
   color: var(--pwc-orange);
 }
+
+/* ── Combined report page ──────────────────────────────── */
+.report-screen {
+  justify-content: flex-start;
+  padding-top: 32px;
+}
+
+.report { width: 100%; max-width: 980px; }
+
+.report__header {
+  background: var(--pwc-midnight);
+  color: var(--white);
+  padding: 24px 32px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.report__eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--pwc-orange);
+  margin-bottom: 4px;
+}
+
+.report__total {
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  margin: 4px 0;
+}
+
+.report__range { font-size: 11px; color: #888; margin-top: 4px; }
+
+.report__overview {
+  background: var(--white);
+  padding: 20px 32px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #eee;
+}
+
+.report__pillars { flex: 1; min-width: 260px; }
+
+/* Rank badge inside top-3 pillar rows */
+.pillar-row__label-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pillar-row__rank {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--pwc-orange);
+  background: rgba(253,81,8,0.1);
+  border-radius: 4px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+/* Priority areas section */
+.report__priorities {
+  background: #F7F7F7;
+  padding: 18px 32px 24px;
+}
+
+.report__priorities-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.report__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 820px) {
+  .report__cards { grid-template-columns: 1fr; }
+}
+
+/* Priority cards */
+.priority-card {
+  background: var(--white);
+  border-radius: 8px;
+  border: 1px solid #EBEBEB;
+  border-top: 3px solid var(--pwc-rose);
+  display: flex;
+  flex-direction: column;
+}
+
+.priority-card--mod { border-top-color: var(--pwc-orange); }
+.priority-card--low { border-top-color: #AAAAAA; }
+
+.priority-card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 6px;
+  flex-wrap: wrap;
+}
+
+.priority-card__num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pwc-orange);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.priority-card__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.priority-card__badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: var(--white);
+  background: var(--pwc-rose);
+  white-space: nowrap;
+}
+
+.priority-card--mod .priority-card__badge { background: var(--pwc-orange); }
+.priority-card--low .priority-card__badge { background: #888; }
+
+.priority-card__leakage {
+  padding: 4px 14px 10px;
+  border-bottom: 1px solid #F3F3F3;
+}
+
+.priority-card__leakage-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.priority-card__leakage-num {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.priority-card__body {
+  padding: 12px 14px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.priority-card__issue {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.priority-card__rec {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.priority-card__steps {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.priority-card__steps li {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Report footer */
+.report__footer {
+  background: var(--pwc-midnight);
+  padding: 14px 32px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report__methodology {
+  font-size: 11px;
+  color: #555;
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  padding: 0;
+}
+
+.report__cta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.report__start-over {
+  border: 1.5px solid rgba(255,255,255,0.2) !important;
+  color: rgba(255,255,255,0.65) !important;
+}

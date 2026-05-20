@@ -5,8 +5,7 @@ import {
   renderBoxQuestion,
   renderSliderQuestion,
   renderCalculating,
-  renderScorecard,
-  renderRecommendations,
+  renderReport,
 } from './screens.js';
 import { SIZING_QUESTIONS, PILLAR_QUESTIONS, PILLAR_LABELS } from './questions.js';
 import { calculateROI } from './calculator.js';
@@ -15,7 +14,7 @@ const state = createState();
 const container = document.getElementById('screen-container');
 const progressFill = document.getElementById('progress-fill');
 
-const TOTAL_SCREENS = 17;
+const TOTAL_SCREENS = 16;
 const PILLAR_ORDER = ['productivity', 'efficiency', 'growth', 'compliance', 'responsibility', 'adoption'];
 
 const SECTOR_LABELS = {
@@ -48,8 +47,7 @@ function getScreenConfig(idx) {
     return { type: 'pillar', pillar: PILLAR_ORDER[pillarIdx], pillarIdx, questionIdx };
   }
   if (idx === 14) return { type: 'calculating' };
-  if (idx === 15) return { type: 'scorecard' };
-  if (idx === 16) return { type: 'recommendations' };
+  if (idx === 15) return { type: 'report' };
   return null;
 }
 
@@ -127,24 +125,17 @@ function render() {
   } else if (cfg.type === 'calculating') {
     container.innerHTML = renderCalculating();
     setTimeout(() => { state.next(); render(); }, 2200);
-  } else if (cfg.type === 'scorecard') {
+  } else if (cfg.type === 'report') {
     const roi = calculateROI(buildRoiResponses());
-    container.innerHTML = renderScorecard({
+    container.innerHTML = renderReport({
       roi,
       maturityLabel: MATURITY_LABELS[state.responses.maturity],
       sectorLabel: SECTOR_LABELS[state.responses.sector],
       headcountLabel: HEADCOUNT_LABELS[state.responses.headcount],
     });
-    document.getElementById('see-recommendations').addEventListener('click', () => {
-      state.next();
-      render();
-    });
     document.getElementById('methodology-link').addEventListener('click', () => {
       window.open('methodology.md', '_blank');
     });
-  } else if (cfg.type === 'recommendations') {
-    const roi = calculateROI(buildRoiResponses());
-    container.innerHTML = renderRecommendations({ roi });
     document.getElementById('talk-to-pwc').addEventListener('click', () => {
       alert('Thanks — a PwC consultant will be in touch. (CTA destination TBD)');
     });
