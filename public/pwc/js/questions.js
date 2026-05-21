@@ -164,8 +164,8 @@ export const PILLAR_QUESTIONS = {
 export const PILLAR_LABELS = {
   productivity: 'Productivity',
   efficiency: 'Efficiency',
-  growth: 'Growth & Innovation',
-  compliance: 'Control / Compliance',
+  growth: 'Innovation',
+  compliance: 'Compliance',
   responsibility: 'Responsibility',
-  adoption: 'Adoption & Literacy',
+  adoption: 'Literacy',
 };

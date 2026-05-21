@@ -9,8 +9,8 @@
   --pwc-midnight: #2D2926;
   --pwc-rose: #E0301E;
   --pwc-marigold: #F2C012;
-  --bg-gradient-from: var(--pwc-orange-5);
-  --bg-gradient-to: var(--pwc-orange-4);
+  --bg-gradient-from: #FFF8F3;
+  --bg-gradient-to: #FFCDA8;
   --option-bg: #FDF5F2;
   --option-border: #E8C4B8;
   --text-primary: #2D2926;
@@ -107,7 +107,7 @@ html, body {
 .option:hover { border-color: var(--pwc-orange); }
 .option--selected {
   border-color: var(--pwc-orange);
-  background: var(--pwc-orange-6);
+  background: rgba(253,81,8,0.12);
 }
 
 .option__label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
@@ -134,7 +134,7 @@ html, body {
 }
 
 .tile:hover { border-color: var(--pwc-orange); }
-.tile--selected { border-color: var(--pwc-orange); background: var(--pwc-orange-6); }
+.tile--selected { border-color: var(--pwc-orange); background: rgba(253,81,8,0.12); }
 
 .nav {
   display: flex;
@@ -198,7 +198,7 @@ html, body {
 
 .slider-level--active {
   border-color: var(--pwc-orange);
-  background: var(--pwc-orange-6);
+  background: rgba(253,81,8,0.12);
 }
 
 .slider-level__num { font-size: 18px; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; }
@@ -661,7 +661,7 @@ html, body {
 }
 
 .sz-opt:hover { border-color: var(--pwc-orange); }
-.sz-opt--selected { border-color: var(--pwc-orange); background: var(--pwc-orange-6); }
+.sz-opt--selected { border-color: var(--pwc-orange); background: rgba(253,81,8,0.12); }
 
 .sz-opt__main { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .sz-opt__sub { font-size: 11px; color: var(--text-secondary); text-align: center; line-height: 1.3; }
@@ -1077,4 +1077,164 @@ html, body {
 .report__start-over {
   border: 1.5px solid rgba(255,255,255,0.2) !important;
   color: rgba(255,255,255,0.65) !important;
+}
+
+/* ── Accordion cards (sections 01-03 on welcome page) ── */
+.wf-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 40px;
+}
+
+.wf-card {
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.wf-card__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.wf-card__header:hover { background: rgba(255,255,255,0.06); }
+
+.wf-card__num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pwc-orange);
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.wf-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(245,237,232,0.9);
+  font-family: var(--font-family);
+  flex: 1;
+}
+
+.wf-card__toggle {
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(245,237,232,0.4);
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+}
+
+.wf-card.open .wf-card__toggle { transform: rotate(45deg); }
+
+.wf-card__body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 260ms ease;
+}
+
+.wf-card.open .wf-card__body { max-height: 400px; }
+
+.wf-card__body-inner { padding: 0 20px 20px; }
+
+.wf-card__text {
+  font-size: 13px;
+  color: rgba(245,237,232,0.6);
+  line-height: 1.65;
+}
+
+/* ── Explainer spider chart (section 04) ── */
+.wf-spider-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.wf-spider-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.wf-spider-svg {
+  flex-shrink: 0;
+  width: 200px;
+  height: auto;
+  overflow: visible;
+}
+
+.wf-spider-segment {
+  fill: rgba(253,81,8,0.08);
+  stroke: rgba(253,81,8,0.3);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: fill 150ms ease, stroke 150ms ease;
+}
+
+.wf-spider-segment:hover {
+  fill: rgba(253,81,8,0.22);
+  stroke: rgba(253,81,8,0.7);
+}
+
+.wf-spider-segment.active {
+  fill: rgba(253,81,8,0.32);
+  stroke: var(--pwc-orange);
+  stroke-width: 1.5;
+}
+
+.wf-spider-info {
+  flex: 1;
+  min-width: 0;
+  padding-top: 8px;
+}
+
+.wf-spider-placeholder {
+  font-size: 12px;
+  color: rgba(245,237,232,0.35);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.wf-spider-detail { display: none; }
+
+.wf-spider-detail__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pwc-orange);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wf-spider-detail__desc {
+  font-size: 12px;
+  color: rgba(245,237,232,0.7);
+  line-height: 1.6;
+}
+
+/* ── Mobile fixes ── */
+@media (max-width: 600px) {
+  body { overflow-x: hidden; }
+
+  .welcome__dark-content { overflow: hidden; }
+
+  .wf-spider-svg { width: 160px; }
+
+  .report__cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report__cta-row .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .report__header { flex-direction: column; gap: 6px; }
+
+  .priority-cards { grid-template-columns: 1fr; }
 }

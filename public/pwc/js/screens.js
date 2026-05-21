@@ -1,6 +1,60 @@
 import { renderSpiderChart } from './spider-chart.js';
 
-const PILLAR_BC_LABELS = ['Productivity', 'Efficiency', 'Growth & Innovation', 'Compliance', 'Responsibility', 'Adoption'];
+const PILLAR_BC_LABELS = ['Productivity', 'Efficiency', 'Innovation', 'Compliance', 'Responsibility', 'Literacy'];
+
+function renderExplainerSpider() {
+  const cx = 165, cy = 130, r = 80;
+  const toRad = d => d * Math.PI / 180;
+  const pt = (frac, deg) => [cx + frac * r * Math.cos(toRad(deg)), cy + frac * r * Math.sin(toRad(deg))];
+
+  const pillars = [
+    { key: 'productivity', label: 'Productivity', angle: -90,  desc: 'Time lost finding, validating and reconciling data before it can be used — a compounding drag on output across every team.' },
+    { key: 'growth',       label: 'Innovation',   angle: -30,  desc: 'Revenue opportunities missed because data isn\'t accessible, trusted, or used strategically. Poor governance limits AI returns before you start.' },
+    { key: 'compliance',   label: 'Compliance',   angle: 30,   desc: 'Audit exposure and the escalating cost of regulatory response. Inconsistent controls across business units create ongoing risk.' },
+    { key: 'adoption',     label: 'Literacy',     angle: 90,   desc: 'Decisions driven by instinct rather than data. Uneven literacy limits the return on data assets your organisation already owns.' },
+    { key: 'responsibility', label: 'Responsibility', angle: 150, desc: 'Unclear accountability when data quality issues arise. Problems persist and recur without defined ownership.' },
+    { key: 'efficiency',   label: 'Efficiency',   angle: 210,  desc: 'Manual processes and fragmented data handoffs that could and should be automated — operational drag at scale.' },
+  ];
+
+  const verts = pillars.map(p => pt(1, p.angle));
+
+  const rings = [0.33, 0.66, 1.0].map(f => {
+    const pts = pillars.map(p => pt(f, p.angle).map(v => v.toFixed(1)).join(',')).join(' ');
+    const col = f === 1.0 ? 'rgba(253,81,8,0.3)' : 'rgba(255,255,255,0.1)';
+    return `<polygon points="${pts}" fill="none" stroke="${col}" stroke-width="${f === 1.0 ? 1.5 : 1}" />`;
+  }).join('');
+
+  const axes = pillars.map(p => {
+    const [x, y] = pt(1, p.angle);
+    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.1)" stroke-width="1" />`;
+  }).join('');
+
+  const segments = pillars.map((p, i) => {
+    const [x1, y1] = verts[i];
+    const [x2, y2] = verts[(i + 1) % 6];
+    const desc = p.desc.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    return `<path class="wf-spider-segment" data-pillar="${p.key}" data-name="${p.label}" data-desc="${desc}" d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)} Z" />`;
+  }).join('');
+
+  const labels = pillars.map(p => {
+    const [lx, ly] = pt((r + 18) / r, p.angle);
+    const cosA = Math.cos(toRad(p.angle));
+    const anchor = Math.abs(cosA) < 0.3 ? 'middle' : cosA > 0 ? 'start' : 'end';
+    return `<text x="${lx.toFixed(1)}" y="${(ly + 3).toFixed(1)}" text-anchor="${anchor}" font-size="9" font-weight="700" fill="rgba(245,237,232,0.6)" font-family="system-ui">${p.label}</text>`;
+  }).join('');
+
+  return `
+    <div class="wf-spider-wrap">
+      <svg class="wf-spider-svg" viewBox="0 0 320 260">${rings}${axes}${segments}<circle cx="${cx}" cy="${cy}" r="3" fill="rgba(253,81,8,0.5)" />${labels}</svg>
+      <div class="wf-spider-info">
+        <p class="wf-spider-placeholder" id="spider-placeholder">Select a segment to explore each pillar</p>
+        <div class="wf-spider-detail" id="spider-content">
+          <div class="wf-spider-detail__name" id="spider-name"></div>
+          <p class="wf-spider-detail__desc" id="spider-desc"></p>
+        </div>
+      </div>
+    </div>`;
+}
 
 function renderBreadcrumb({ pillarIndex }) {
   const items = PILLAR_BC_LABELS.map((label, i) => {
@@ -33,7 +87,7 @@ export function renderWelcome() {
             </div>
             <div class="welcome__stat">
               <span class="welcome__stat-num">$M</span>
-              <span class="welcome__stat-label">Annual value at risk, quantified</span>
+              <span class="welcome__stat-label">Annual value leakage, quantified</span>
             </div>
             <div class="welcome__stat">
               <span class="welcome__stat-num">3</span>
@@ -41,41 +95,55 @@ export function renderWelcome() {
             </div>
           </div>
 
-          <div class="wf-section">
-            <div class="wf-section__num">01</div>
-            <h3 class="wf-section__title">What is Data Governance?</h3>
-            <p class="wf-section__body">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently — across every team, every decision, every quarter.</p>
-          </div>
-
-          <div class="wf-section">
-            <div class="wf-section__num">02</div>
-            <h3 class="wf-section__title">Why it belongs on the board agenda</h3>
-            <div class="wf-points">
-              <div class="wf-point"><span class="wf-point__dot"></span><span>Regulators across APAC are tightening data requirements — from PDPA to sector-specific mandates. The cost of non-compliance is rising.</span></div>
-              <div class="wf-point"><span class="wf-point__dot"></span><span>AI investment is accelerating — but AI is only as good as the data it runs on. Poor governance limits returns before you start.</span></div>
-              <div class="wf-point"><span class="wf-point__dot"></span><span>Data breaches carry reputational and financial costs that dwarf the investment in prevention.</span></div>
-              <div class="wf-point"><span class="wf-point__dot"></span><span>Organisations with mature data governance consistently outperform peers on decision speed, accuracy, and competitive agility.</span></div>
+          <div class="wf-cards">
+            <div class="wf-card">
+              <div class="wf-card__header">
+                <span class="wf-card__num">01</span>
+                <h3 class="wf-card__title">What is Data Governance?</h3>
+                <span class="wf-card__toggle">+</span>
+              </div>
+              <div class="wf-card__body">
+                <div class="wf-card__body-inner">
+                  <p class="wf-card__text">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently — across every team, every decision, every quarter.</p>
+                </div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div class="wf-card__header">
+                <span class="wf-card__num">02</span>
+                <h3 class="wf-card__title">Why it belongs on the board agenda</h3>
+                <span class="wf-card__toggle">+</span>
+              </div>
+              <div class="wf-card__body">
+                <div class="wf-card__body-inner">
+                  <div class="wf-card__points">
+                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>Regulators across APAC are tightening data requirements — the cost of non-compliance is rising.</span></div>
+                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>AI investment is accelerating — but AI is only as good as the data it runs on.</span></div>
+                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>Data breaches carry costs that dwarf the investment in prevention.</span></div>
+                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>Organisations with mature governance consistently outperform on decision speed and agility.</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-card">
+              <div class="wf-card__header">
+                <span class="wf-card__num">03</span>
+                <h3 class="wf-card__title">How we quantify the gap</h3>
+                <span class="wf-card__toggle">+</span>
+              </div>
+              <div class="wf-card__body">
+                <div class="wf-card__body-inner">
+                  <p class="wf-card__text">We translate governance gaps into dollar figures — headcount, estimated labour cost, and sector multipliers applied across six pillars. The result is an indicative annual value leakage: a credible signal of where to act and how urgently.</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="wf-section">
-            <div class="wf-section__num">03</div>
-            <h3 class="wf-section__title">How we quantify the gap</h3>
-            <p class="wf-section__body">We translate governance gaps into dollar figures using a consistent ROI methodology — your organisation's headcount, estimated annual labour cost, and sector-specific multipliers, applied against your responses across six governance pillars. The output is an indicative annual value at risk: not a precise forecast, but a credible, defensible signal of where to act and how urgently.</p>
-          </div>
-
-          <div class="wf-section">
+          <div class="wf-spider-section">
             <div class="wf-section__num">04</div>
             <h3 class="wf-section__title">The assessment framework</h3>
-            <p class="wf-section__body wf-section__body--mb">Six pillars capture the full cost of a governance gap — from day-to-day productivity drag through to strategic and regulatory exposure.</p>
-            <div class="wf-pillars">
-              <div class="wf-pillar"><span class="wf-pillar__num">1</span><div><div class="wf-pillar__name">Productivity</div><div class="wf-pillar__desc">Time lost finding, validating and reconciling data before it can be used</div></div></div>
-              <div class="wf-pillar"><span class="wf-pillar__num">2</span><div><div class="wf-pillar__name">Efficiency</div><div class="wf-pillar__desc">Manual processes and data handoffs that could and should be automated</div></div></div>
-              <div class="wf-pillar"><span class="wf-pillar__num">3</span><div><div class="wf-pillar__name">Growth &amp; Innovation</div><div class="wf-pillar__desc">Revenue opportunities missed because data isn't accessible, trusted, or used strategically</div></div></div>
-              <div class="wf-pillar"><span class="wf-pillar__num">4</span><div><div class="wf-pillar__name">Control / Compliance</div><div class="wf-pillar__desc">Audit exposure and the escalating cost of responding to regulatory requirements</div></div></div>
-              <div class="wf-pillar"><span class="wf-pillar__num">5</span><div><div class="wf-pillar__name">Responsibility</div><div class="wf-pillar__desc">Unclear accountability when data quality issues or incidents arise</div></div></div>
-              <div class="wf-pillar"><span class="wf-pillar__num">6</span><div><div class="wf-pillar__name">Adoption &amp; Literacy</div><div class="wf-pillar__desc">Decisions made on instinct rather than the data your organisation already has</div></div></div>
-            </div>
+            <p class="wf-section__body wf-section__body--mb">Six pillars — click each segment to explore.</p>
+            ${renderExplainerSpider()}
           </div>
 
         </div>
@@ -245,10 +313,10 @@ function riskLabel(tier) {
 const PILLAR_LABELS_FULL = {
   productivity: 'Productivity',
   efficiency: 'Efficiency',
-  growth: 'Growth & Innovation',
-  compliance: 'Control / Compliance',
+  growth: 'Innovation',
+  compliance: 'Compliance',
   responsibility: 'Responsibility',
-  adoption: 'Adoption / Literacy',
+  adoption: 'Literacy',
 };
 
 export function renderScorecard({ roi, maturityLabel, sectorLabel, headcountLabel }) {

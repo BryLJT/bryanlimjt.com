@@ -96,6 +96,23 @@ function render() {
       }
     });
     emailInput.focus();
+
+    document.querySelectorAll('.wf-card').forEach(card => {
+      card.querySelector('.wf-card__header').addEventListener('click', () => {
+        card.classList.toggle('open');
+      });
+    });
+
+    document.querySelectorAll('.wf-spider-segment').forEach(seg => {
+      seg.addEventListener('click', () => {
+        document.querySelectorAll('.wf-spider-segment').forEach(s => s.classList.remove('active'));
+        seg.classList.add('active');
+        document.getElementById('spider-placeholder').style.display = 'none';
+        document.getElementById('spider-content').style.display = 'block';
+        document.getElementById('spider-name').textContent = seg.dataset.name;
+        document.getElementById('spider-desc').textContent = seg.dataset.desc;
+      });
+    });
   } else if (cfg.type === 'sizing') {
     container.innerHTML = renderSizingScreen({ responses: state.responses });
     wireSizingScreen();
