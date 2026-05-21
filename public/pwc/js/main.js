@@ -12,9 +12,7 @@ import { calculateROI } from './calculator.js';
 
 const state = createState();
 const container = document.getElementById('screen-container');
-const progressFill = document.getElementById('progress-fill');
 
-const TOTAL_SCREENS = 16;
 const PILLAR_ORDER = ['productivity', 'efficiency', 'growth', 'compliance', 'responsibility', 'adoption'];
 
 const SECTOR_LABELS = {
@@ -157,7 +155,6 @@ function render() {
     });
   }
 
-  progressFill.style.width = `${(state.currentScreen / (TOTAL_SCREENS - 1)) * 100}%`;
 }
 
 const AUTO_ADVANCE_MS = 220;
