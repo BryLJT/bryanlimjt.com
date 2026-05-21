@@ -97,11 +97,7 @@ function render() {
     });
     emailInput.focus();
 
-    document.querySelectorAll('.wf-card').forEach(card => {
-      card.querySelector('.wf-card__header').addEventListener('click', () => {
-        card.classList.toggle('open');
-      });
-    });
+    wireWelcomeCarousel();
 
     document.querySelectorAll('.wf-spider-segment').forEach(seg => {
       seg.addEventListener('click', () => {
@@ -239,5 +235,65 @@ function wireSliderScreen(pillar, qIdx) {
   backBtn.addEventListener('click', () => { state.back(); render(); });
 }
 
+function wireWelcomeCarousel() {
+  const track = document.getElementById('wf-track');
+  const prev = document.getElementById('wf-prev');
+  const next = document.getElementById('wf-next');
+  const dots = Array.from(document.querySelectorAll('.wf-dot'));
+  if (!track) return;
+
+  const total = track.children.length;
+  let idx = 0;
+  let dragStartX = null;
+  let dragDx = 0;
+  let dragging = false;
+
+  function go(n) {
+    idx = Math.max(0, Math.min(total - 1, n));
+    track.style.transition = 'transform 380ms cubic-bezier(.2,.7,.2,1)';
+    track.style.transform = `translateX(${-idx * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('wf-dot--active', i === idx));
+    prev.disabled = idx === 0;
+    next.disabled = idx === total - 1;
+  }
+
+  prev.addEventListener('click', () => go(idx - 1));
+  next.addEventListener('click', () => go(idx + 1));
+  dots.forEach(d => d.addEventListener('click', () => go(Number(d.dataset.idx))));
+
+  function onDown(e) {
+    dragging = true;
+    dragStartX = e.touches ? e.touches[0].clientX : e.clientX;
+    dragDx = 0;
+    track.style.transition = 'none';
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    dragDx = x - dragStartX;
+    const width = track.parentElement.clientWidth;
+    const pct = (dragDx / width) * 100;
+    track.style.transform = `translateX(calc(${-idx * 100}% + ${pct}%))`;
+  }
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    const width = track.parentElement.clientWidth;
+    const threshold = width * 0.18;
+    if (dragDx < -threshold) go(idx + 1);
+    else if (dragDx > threshold) go(idx - 1);
+    else go(idx);
+    dragDx = 0;
+  }
+
+  track.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  track.addEventListener('touchstart', onDown, { passive: true });
+  track.addEventListener('touchmove', onMove, { passive: true });
+  track.addEventListener('touchend', onUp);
+
+  go(0);
+}
 
 render();

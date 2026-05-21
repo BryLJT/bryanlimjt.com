@@ -1079,72 +1079,143 @@ html, body {
   color: rgba(255,255,255,0.65) !important;
 }
 
-/* ── Accordion cards (sections 01-03 on welcome page) ── */
-.wf-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin-bottom: 40px;
-}
-
-.wf-card {
-  background: rgba(255,255,255,0.06);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.wf-card__header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
-  cursor: pointer;
+/* ── Carousel (sections 01-03 on welcome page) ── */
+.wf-carousel {
+  margin-bottom: 56px;
   user-select: none;
-  transition: background 120ms ease;
 }
 
-.wf-card__header:hover { background: rgba(255,255,255,0.06); }
+.wf-carousel__viewport {
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
-.wf-card__num {
-  font-size: 11px;
+.wf-carousel__track {
+  display: flex;
+  cursor: grab;
+  will-change: transform;
+}
+
+.wf-carousel__track:active { cursor: grabbing; }
+
+.wf-slide {
+  flex: 0 0 100%;
+  padding: 38px 36px 40px;
+  min-height: 280px;
+  pointer-events: none;
+}
+
+.wf-slide__num {
+  font-size: 13px;
   font-weight: 700;
   color: var(--pwc-orange);
-  letter-spacing: 0.08em;
-  flex-shrink: 0;
+  letter-spacing: 0.12em;
+  margin-bottom: 14px;
 }
 
-.wf-card__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(245,237,232,0.9);
+.wf-slide__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(245,237,232,0.96);
   font-family: var(--font-family);
-  flex: 1;
+  line-height: 1.25;
+  margin-bottom: 18px;
 }
 
-.wf-card__toggle {
-  font-size: 18px;
-  font-weight: 300;
-  color: rgba(245,237,232,0.4);
-  transition: transform 200ms ease;
-  flex-shrink: 0;
-}
-
-.wf-card.open .wf-card__toggle { transform: rotate(45deg); }
-
-.wf-card__body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 260ms ease;
-}
-
-.wf-card.open .wf-card__body { max-height: 400px; }
-
-.wf-card__body-inner { padding: 0 20px 20px; }
-
-.wf-card__text {
-  font-size: 13px;
-  color: rgba(245,237,232,0.6);
+.wf-slide__text {
+  font-size: 16px;
+  color: rgba(245,237,232,0.72);
   line-height: 1.65;
+}
+
+.wf-slide__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wf-slide__list li {
+  font-size: 15px;
+  color: rgba(245,237,232,0.72);
+  line-height: 1.55;
+  padding-left: 18px;
+  position: relative;
+}
+
+.wf-slide__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pwc-orange);
+}
+
+.wf-carousel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.wf-carousel__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.04);
+  color: rgba(245,237,232,0.85);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, opacity 150ms ease;
+  font-family: inherit;
+}
+
+.wf-carousel__btn:hover:not(:disabled) {
+  border-color: var(--pwc-orange);
+  background: rgba(253,81,8,0.12);
+  color: var(--pwc-orange);
+}
+
+.wf-carousel__btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.wf-carousel__dots {
+  display: flex;
+  gap: 10px;
+}
+
+.wf-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(245,237,232,0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.wf-dot:hover { background: rgba(245,237,232,0.4); }
+
+.wf-dot--active {
+  background: var(--pwc-orange);
+  transform: scale(1.25);
 }
 
 /* ── Explainer spider chart (section 04) ── */
@@ -1155,21 +1226,23 @@ html, body {
 
 .wf-spider-wrap {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
-  align-items: flex-start;
   margin-top: 12px;
 }
 
 .wf-spider-svg {
-  flex-shrink: 0;
-  width: 200px;
+  width: 100%;
+  max-width: 440px;
   height: auto;
   overflow: visible;
+  display: block;
 }
 
 .wf-spider-segment {
   fill: rgba(253,81,8,0.08);
-  stroke: rgba(253,81,8,0.3);
+  stroke: rgba(253,81,8,0.35);
   stroke-width: 1;
   cursor: pointer;
   transition: fill 150ms ease, stroke 150ms ease;
@@ -1177,44 +1250,52 @@ html, body {
 
 .wf-spider-segment:hover {
   fill: rgba(253,81,8,0.22);
-  stroke: rgba(253,81,8,0.7);
+  stroke: rgba(253,81,8,0.75);
 }
 
 .wf-spider-segment.active {
-  fill: rgba(253,81,8,0.32);
+  fill: rgba(253,81,8,0.34);
   stroke: var(--pwc-orange);
   stroke-width: 1.5;
 }
 
 .wf-spider-info {
-  flex: 1;
-  min-width: 0;
-  padding-top: 8px;
+  width: 100%;
+  min-height: 100px;
+  padding: 20px 22px;
+  background: rgba(255,255,255,0.04);
+  border-left: 3px solid var(--pwc-orange);
+  border-radius: 4px;
 }
 
 .wf-spider-placeholder {
-  font-size: 12px;
-  color: rgba(245,237,232,0.35);
+  font-size: 15px;
+  color: rgba(245,237,232,0.5);
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .wf-spider-detail { display: none; }
 
 .wf-spider-detail__name {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--pwc-orange);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .wf-spider-detail__desc {
-  font-size: 12px;
-  color: rgba(245,237,232,0.7);
-  line-height: 1.6;
+  font-size: 15px;
+  color: rgba(245,237,232,0.82);
+  line-height: 1.65;
 }
+
+/* Bump the welcome panel section heads + intros to match larger body text */
+.welcome__dark-content .wf-section__num { font-size: 13px; }
+.welcome__dark-content .wf-section__title { font-size: 22px; }
+.welcome__dark-content .wf-section__body { font-size: 15px; line-height: 1.6; }
 
 /* ── Mobile fixes ── */
 @media (max-width: 600px) {
@@ -1222,7 +1303,11 @@ html, body {
 
   .welcome__dark-content { overflow: hidden; }
 
-  .wf-spider-svg { width: 160px; }
+  .wf-slide { padding: 30px 24px 32px; min-height: 240px; }
+  .wf-slide__title { font-size: 20px; }
+  .wf-slide__text, .wf-slide__list li { font-size: 14px; }
+
+  .wf-spider-svg { max-width: 100%; }
 
   .report__cta-row {
     flex-direction: column;

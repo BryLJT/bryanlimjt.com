@@ -3,7 +3,7 @@ import { renderSpiderChart } from './spider-chart.js';
 const PILLAR_BC_LABELS = ['Productivity', 'Efficiency', 'Innovation', 'Compliance', 'Responsibility', 'Literacy'];
 
 function renderExplainerSpider() {
-  const cx = 165, cy = 130, r = 80;
+  const cx = 220, cy = 200, r = 130;
   const toRad = d => d * Math.PI / 180;
   const pt = (frac, deg) => [cx + frac * r * Math.cos(toRad(deg)), cy + frac * r * Math.sin(toRad(deg))];
 
@@ -20,13 +20,13 @@ function renderExplainerSpider() {
 
   const rings = [0.33, 0.66, 1.0].map(f => {
     const pts = pillars.map(p => pt(f, p.angle).map(v => v.toFixed(1)).join(',')).join(' ');
-    const col = f === 1.0 ? 'rgba(253,81,8,0.3)' : 'rgba(255,255,255,0.1)';
+    const col = f === 1.0 ? 'rgba(253,81,8,0.35)' : 'rgba(255,255,255,0.12)';
     return `<polygon points="${pts}" fill="none" stroke="${col}" stroke-width="${f === 1.0 ? 1.5 : 1}" />`;
   }).join('');
 
   const axes = pillars.map(p => {
     const [x, y] = pt(1, p.angle);
-    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.1)" stroke-width="1" />`;
+    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />`;
   }).join('');
 
   const segments = pillars.map((p, i) => {
@@ -37,17 +37,17 @@ function renderExplainerSpider() {
   }).join('');
 
   const labels = pillars.map(p => {
-    const [lx, ly] = pt((r + 18) / r, p.angle);
+    const [lx, ly] = pt((r + 24) / r, p.angle);
     const cosA = Math.cos(toRad(p.angle));
     const anchor = Math.abs(cosA) < 0.3 ? 'middle' : cosA > 0 ? 'start' : 'end';
-    return `<text x="${lx.toFixed(1)}" y="${(ly + 3).toFixed(1)}" text-anchor="${anchor}" font-size="9" font-weight="700" fill="rgba(245,237,232,0.6)" font-family="system-ui">${p.label}</text>`;
+    return `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="${anchor}" font-size="14" font-weight="700" fill="rgba(245,237,232,0.85)" font-family="system-ui">${p.label}</text>`;
   }).join('');
 
   return `
     <div class="wf-spider-wrap">
-      <svg class="wf-spider-svg" viewBox="0 0 320 260">${rings}${axes}${segments}<circle cx="${cx}" cy="${cy}" r="3" fill="rgba(253,81,8,0.5)" />${labels}</svg>
+      <svg class="wf-spider-svg" viewBox="0 0 440 400" preserveAspectRatio="xMidYMid meet">${rings}${axes}${segments}<circle cx="${cx}" cy="${cy}" r="4" fill="rgba(253,81,8,0.6)" />${labels}</svg>
       <div class="wf-spider-info">
-        <p class="wf-spider-placeholder" id="spider-placeholder">Select a segment to explore each pillar</p>
+        <p class="wf-spider-placeholder" id="spider-placeholder">Click any segment to explore the pillar.</p>
         <div class="wf-spider-detail" id="spider-content">
           <div class="wf-spider-detail__name" id="spider-name"></div>
           <p class="wf-spider-detail__desc" id="spider-desc"></p>
@@ -95,47 +95,39 @@ export function renderWelcome() {
             </div>
           </div>
 
-          <div class="wf-cards">
-            <div class="wf-card">
-              <div class="wf-card__header">
-                <span class="wf-card__num">01</span>
-                <h3 class="wf-card__title">What is Data Governance?</h3>
-                <span class="wf-card__toggle">+</span>
-              </div>
-              <div class="wf-card__body">
-                <div class="wf-card__body-inner">
-                  <p class="wf-card__text">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently — across every team, every decision, every quarter.</p>
+          <div class="wf-carousel" id="wf-carousel">
+            <div class="wf-carousel__viewport">
+              <div class="wf-carousel__track" id="wf-track">
+                <div class="wf-slide">
+                  <div class="wf-slide__num">01</div>
+                  <h3 class="wf-slide__title">What is Data Governance?</h3>
+                  <p class="wf-slide__text">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently — across every team, every decision, every quarter.</p>
+                </div>
+                <div class="wf-slide">
+                  <div class="wf-slide__num">02</div>
+                  <h3 class="wf-slide__title">Why it belongs on the board agenda</h3>
+                  <ul class="wf-slide__list">
+                    <li>Regulators across APAC are tightening data requirements — the cost of non-compliance is rising.</li>
+                    <li>AI investment is accelerating — but AI is only as good as the data it runs on.</li>
+                    <li>Data breaches carry costs that dwarf the investment in prevention.</li>
+                    <li>Organisations with mature governance consistently outperform on decision speed and agility.</li>
+                  </ul>
+                </div>
+                <div class="wf-slide">
+                  <div class="wf-slide__num">03</div>
+                  <h3 class="wf-slide__title">How we quantify the gap</h3>
+                  <p class="wf-slide__text">We translate governance gaps into dollar figures — headcount, estimated labour cost, and sector multipliers applied across six pillars. The result is an indicative annual value leakage: a credible signal of where to act and how urgently.</p>
                 </div>
               </div>
             </div>
-            <div class="wf-card">
-              <div class="wf-card__header">
-                <span class="wf-card__num">02</span>
-                <h3 class="wf-card__title">Why it belongs on the board agenda</h3>
-                <span class="wf-card__toggle">+</span>
+            <div class="wf-carousel__controls">
+              <button class="wf-carousel__btn" id="wf-prev" aria-label="Previous">‹</button>
+              <div class="wf-carousel__dots" id="wf-dots">
+                <button class="wf-dot wf-dot--active" data-idx="0" aria-label="Slide 1"></button>
+                <button class="wf-dot" data-idx="1" aria-label="Slide 2"></button>
+                <button class="wf-dot" data-idx="2" aria-label="Slide 3"></button>
               </div>
-              <div class="wf-card__body">
-                <div class="wf-card__body-inner">
-                  <div class="wf-card__points">
-                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>Regulators across APAC are tightening data requirements — the cost of non-compliance is rising.</span></div>
-                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>AI investment is accelerating — but AI is only as good as the data it runs on.</span></div>
-                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>Data breaches carry costs that dwarf the investment in prevention.</span></div>
-                    <div class="wf-card__point"><span class="wf-point__dot"></span><span>Organisations with mature governance consistently outperform on decision speed and agility.</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="wf-card">
-              <div class="wf-card__header">
-                <span class="wf-card__num">03</span>
-                <h3 class="wf-card__title">How we quantify the gap</h3>
-                <span class="wf-card__toggle">+</span>
-              </div>
-              <div class="wf-card__body">
-                <div class="wf-card__body-inner">
-                  <p class="wf-card__text">We translate governance gaps into dollar figures — headcount, estimated labour cost, and sector multipliers applied across six pillars. The result is an indicative annual value leakage: a credible signal of where to act and how urgently.</p>
-                </div>
-              </div>
+              <button class="wf-carousel__btn" id="wf-next" aria-label="Next">›</button>
             </div>
           </div>
 
