@@ -115,7 +115,7 @@ export function renderWelcome() {
                 </div>
                 <div class="wf-slide">
                   <div class="wf-slide__num">03</div>
-                  <h3 class="wf-slide__title">Your data has a hidden cost</h3>
+                  <h3 class="wf-slide__title">From governance gap to dollar figure</h3>
                   <p class="wf-slide__text">We translate governance gaps into dollar figures — headcount, estimated labour cost, and sector multipliers applied across six pillars. The result is an indicative annual value leakage: a credible signal of where to act and how urgently.</p>
                 </div>
               </div>
