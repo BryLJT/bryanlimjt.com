@@ -87,7 +87,7 @@ export function renderWelcome() {
             </div>
             <div class="welcome__stat">
               <span class="welcome__stat-num">$M</span>
-              <span class="welcome__stat-label">Annual value leakage, quantified</span>
+              <span class="welcome__stat-label">Data governance ROI, quantified</span>
             </div>
             <div class="welcome__stat">
               <span class="welcome__stat-num">3</span>
