@@ -44,7 +44,7 @@ export function renderSpiderChart(scores) {
   const dataPolygon = dataPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
   const rings = [0.2, 0.4, 0.6, 0.8, 1.0].map(f => {
-    const stroke = f === 0.8 ? 'stroke="#FFAA72" stroke-dasharray="4,3"' : 'stroke="#E8E8E8"';
+    const stroke = f === 0.8 ? 'stroke="#2D2926" stroke-dasharray="4,3"' : 'stroke="#E8E8E8"';
     return `<polygon points="${hexagonPoints(f)}" fill="none" ${stroke} stroke-width="1.2" />`;
   }).join('');
 
@@ -69,7 +69,7 @@ export function renderSpiderChart(scores) {
       <polygon points="${dataPolygon}" fill="#FD5108" fill-opacity="0.18" stroke="#FD5108" stroke-width="2" />
       ${dots}
       ${labels}
-      <line x1="24" y1="268" x2="42" y2="268" stroke="#FFAA72" stroke-dasharray="4,3" stroke-width="1.5" />
+      <line x1="24" y1="268" x2="42" y2="268" stroke="#2D2926" stroke-dasharray="4,3" stroke-width="1.5" />
       <text x="46" y="272" font-size="9" font-family="system-ui" fill="#888">Industry benchmark (80%)</text>
     </svg>
   `;
