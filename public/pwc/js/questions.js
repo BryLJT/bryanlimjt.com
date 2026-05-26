@@ -166,6 +166,6 @@ export const PILLAR_LABELS = {
   efficiency: 'Efficiency',
   growth: 'Innovation',
   compliance: 'Compliance',
-  responsibility: 'Responsibility',
+  responsibility: 'Accountability',
   adoption: 'Literacy',
 };

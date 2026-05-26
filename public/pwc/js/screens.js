@@ -1,6 +1,6 @@
 import { renderSpiderChart } from './spider-chart.js';
 
-const PILLAR_BC_LABELS = ['Productivity', 'Efficiency', 'Innovation', 'Compliance', 'Responsibility', 'Literacy'];
+const PILLAR_BC_LABELS = ['Productivity', 'Efficiency', 'Innovation', 'Compliance', 'Accountability', 'Literacy'];
 
 function renderExplainerSpider() {
   const cx = 220, cy = 200, r = 130;
@@ -12,7 +12,7 @@ function renderExplainerSpider() {
     { key: 'growth',       label: 'Innovation',   angle: -30,  desc: 'Revenue opportunities missed because data isn\'t accessible, trusted, or used strategically. Poor governance limits AI returns before you start.' },
     { key: 'compliance',   label: 'Compliance',   angle: 30,   desc: 'Audit exposure and the escalating cost of regulatory response. Inconsistent controls across business units create ongoing risk.' },
     { key: 'adoption',     label: 'Literacy',     angle: 90,   desc: 'Decisions driven by instinct rather than data. Uneven literacy limits the return on data assets your organisation already owns.' },
-    { key: 'responsibility', label: 'Responsibility', angle: 150, desc: 'Unclear accountability when data quality issues arise. Problems persist and recur without defined ownership.' },
+    { key: 'responsibility', label: 'Accountability', angle: 150, desc: 'Unclear accountability when data quality issues arise. Problems persist and recur without defined ownership.' },
     { key: 'efficiency',   label: 'Efficiency',   angle: 210,  desc: 'Manual processes and fragmented data handoffs that could and should be automated — operational drag at scale.' },
   ];
 
@@ -24,16 +24,26 @@ function renderExplainerSpider() {
     return `<polygon points="${pts}" fill="none" stroke="${col}" stroke-width="${f === 1.0 ? 1.5 : 1}" />`;
   }).join('');
 
-  const axes = pillars.map(p => {
-    const [x, y] = pt(1, p.angle);
-    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />`;
+  // Radial lines run to the EDGE midpoints (not the vertices) so they trace the
+  // kite borders instead of bisecting each kite.
+  const axes = pillars.map((p, i) => {
+    const [ax, ay] = verts[i];
+    const [bx, by] = verts[(i + 1) % 6];
+    const mx = (ax + bx) / 2, my = (ay + by) / 2;
+    return `<line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />`;
   }).join('');
 
   const segments = pillars.map((p, i) => {
-    const [x1, y1] = verts[i];
-    const [x2, y2] = verts[(i + 1) % 6];
+    // Kite per pillar: centre → midpoint to prev vertex → this pillar's vertex →
+    // midpoint to next vertex. Each region points AT its own vertex (and label),
+    // unlike a pie-slice triangle which would sit between two vertices.
+    const [tx, ty] = verts[i];
+    const [px, py] = verts[(i + 5) % 6];
+    const [nx, ny] = verts[(i + 1) % 6];
+    const lmx = (px + tx) / 2, lmy = (py + ty) / 2;
+    const rmx = (tx + nx) / 2, rmy = (ty + ny) / 2;
     const desc = p.desc.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-    return `<path class="wf-spider-segment" data-pillar="${p.key}" data-name="${p.label}" data-desc="${desc}" d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)} Z" />`;
+    return `<path class="wf-spider-segment" data-pillar="${p.key}" data-name="${p.label}" data-desc="${desc}" d="M${cx},${cy} L${lmx.toFixed(1)},${lmy.toFixed(1)} L${tx.toFixed(1)},${ty.toFixed(1)} L${rmx.toFixed(1)},${rmy.toFixed(1)} Z" />`;
   }).join('');
 
   const labels = pillars.map(p => {
@@ -202,7 +212,7 @@ export function renderSizingScreen({ responses }) {
           </div>
         </div>
 
-        <div class="nav nav--fixed">
+        <div class="nav">
           <button class="btn btn--ghost" id="nav-back">← Back</button>
           <button class="btn btn--primary" id="nav-next" disabled>Next →</button>
         </div>
@@ -227,7 +237,7 @@ export function renderBoxQuestion({ eyebrow, question, options, selectedValue, b
         <h2 class="question">${question}</h2>
         <p class="subtitle">Select the option that best reflects your organisation.</p>
         ${optionsHtml}
-        <div class="nav nav--fixed">
+        <div class="nav">
           <button class="btn btn--ghost" id="nav-back">← Back</button>
           <button class="btn btn--primary" id="nav-next" disabled>Next →</button>
         </div>
@@ -257,7 +267,7 @@ export function renderSliderQuestion({ eyebrow, question, descriptors, currentVa
           <input type="range" min="1" max="5" value="${value}" id="slider-input" />
           <div class="slider-levels" id="slider-levels">${levelsHtml}</div>
         </div>
-        <div class="nav nav--fixed">
+        <div class="nav">
           <button class="btn btn--ghost" id="nav-back">← Back</button>
           <button class="btn btn--primary" id="nav-next">Next →</button>
         </div>
@@ -307,7 +317,7 @@ const PILLAR_LABELS_FULL = {
   efficiency: 'Efficiency',
   growth: 'Innovation',
   compliance: 'Compliance',
-  responsibility: 'Responsibility',
+  responsibility: 'Accountability',
   adoption: 'Literacy',
 };
 

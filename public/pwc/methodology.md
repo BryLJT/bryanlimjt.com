@@ -51,7 +51,7 @@ Each pillar carries a weight expressed as a proportion of annual labour cost —
 | Efficiency | 15% | IDC: "data friction costs average 21% of productivity" |
 | Growth / Innovation | 12% | Forrester: "data-driven firms grow 30% faster — delta applied" |
 | Control / Compliance | 10% | IBM: regulatory response costs avg 10–15% of IT spend |
-| Responsibility / Accountability | 8% | Gartner: "data incidents cost avg $3.86M — normalised to labour" |
+| Accountability | 8% | Gartner: "data incidents cost avg $3.86M — normalised to labour" |
 | Adoption / Literacy | 10% | McKinsey: "data literacy gap reduces workforce effectiveness by 10–12%" |
 
 **All weights require primary source verification before external use.**

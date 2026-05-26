@@ -11,7 +11,7 @@ const PILLAR_LABELS_SHORT = {
   growth: 'Innovation',
   compliance: 'Compliance',
   adoption: 'Literacy',
-  responsibility: 'Responsibility',
+  responsibility: 'Accountability',
   efficiency: 'Efficiency',
 };
 

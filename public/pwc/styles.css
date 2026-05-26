@@ -544,18 +544,6 @@ html, body {
 }
 
 /* Fixed nav buttons (question screens) */
-.nav--fixed {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 720px;
-  padding: 0 48px;
-  z-index: 30;
-  pointer-events: none;
-}
-.nav--fixed button { pointer-events: all; }
 
 /* Breadcrumb sidebar (fixed left, pillar screens only) */
 .breadcrumb {
@@ -1335,8 +1323,15 @@ html, body {
   /* Reclaim the wide desktop side padding on phones so content uses more of the
      screen — widens the slider track + its 5-box row (which stay aligned).
      Excludes the welcome screen, which manages its own full-bleed layout. */
-  .screen:not(.welcome-screen) { padding-left: 16px; padding-right: 16px; }
-  .slider-levels { gap: 6px; }
+  .screen:not(.welcome-screen) { padding-left: 12px; padding-right: 12px; }
+
+  /* Slider levels: tighten spacing + shrink text a notch so all 5 boxes fit a
+     phone row with each word on its own line (no mid-word breaks). */
+  .slider-levels { gap: 5px; }
+  .slider-level { padding: 10px 4px; }
+  .slider-level__num { font-size: 16px; }
+  .slider-level__name { font-size: 10px; }
+  .slider-level__desc { font-size: 9px; }
 
   .welcome__dark-content { overflow: hidden; }
 
