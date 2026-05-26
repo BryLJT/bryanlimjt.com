@@ -55,7 +55,7 @@ export function renderSpiderChart(scores) {
 
   const labels = PILLAR_ORDER.map((p, i) => {
     const pos = labelPosition(i);
-    return `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="${pos.anchor}" font-size="10" font-weight="600" fill="#555" font-family="system-ui">${PILLAR_LABELS_SHORT[p]}</text>`;
+    return `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="${pos.anchor}" font-size="13" font-weight="600" fill="#555" font-family="system-ui">${PILLAR_LABELS_SHORT[p]}</text>`;
   }).join('');
 
   const dots = dataPoints.map(p =>
@@ -63,14 +63,14 @@ export function renderSpiderChart(scores) {
   ).join('');
 
   return `
-    <svg width="300" height="280" viewBox="0 0 300 280">
+    <svg class="report-spider" width="560" height="392" viewBox="-50 0 400 280">
       ${rings}
       ${axes}
       <polygon points="${dataPolygon}" fill="#FD5108" fill-opacity="0.18" stroke="#FD5108" stroke-width="2" />
       ${dots}
       ${labels}
       <line x1="24" y1="268" x2="42" y2="268" stroke="#2D2926" stroke-dasharray="4,3" stroke-width="1.5" />
-      <text x="46" y="272" font-size="9" font-family="system-ui" fill="#888">Industry benchmark (80%)</text>
+      <text x="46" y="272" font-size="11" font-family="system-ui" fill="#888">Industry benchmark (80%)</text>
     </svg>
   `;
 }

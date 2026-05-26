@@ -153,6 +153,7 @@ function render() {
     document.getElementById('start-over').addEventListener('click', () => {
       window.location.reload();
     });
+    wireReportCarousel();
   }
 
 }
@@ -290,6 +291,75 @@ function wireWelcomeCarousel() {
   track.addEventListener('touchmove', onMove, { passive: true });
   track.addEventListener('touchend', onUp);
 
+  go(0);
+}
+
+// Mobile-only carousel for the report's 3 priority cards. Mirrors the welcome
+// carousel but gates on a media query so desktop/tablet keep the static grid.
+function wireReportCarousel() {
+  const track = document.getElementById('report-cards-track');
+  if (!track) return;
+  const prev = document.getElementById('report-prev');
+  const next = document.getElementById('report-next');
+  const dots = Array.from(document.querySelectorAll('#report-cards-controls .wf-dot'));
+  const mq = window.matchMedia('(max-width: 600px)');
+  const total = track.children.length;
+  let idx = 0, dragStartX = null, dragDx = 0, dragging = false;
+
+  function go(n) {
+    idx = Math.max(0, Math.min(total - 1, n));
+    if (!mq.matches) {
+      // Desktop/tablet: leave the grid untouched.
+      track.style.transition = '';
+      track.style.transform = '';
+      return;
+    }
+    track.style.transition = 'transform 380ms cubic-bezier(.2,.7,.2,1)';
+    track.style.transform = `translateX(${-idx * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('wf-dot--active', i === idx));
+    prev.disabled = idx === 0;
+    next.disabled = idx === total - 1;
+  }
+
+  prev.addEventListener('click', () => go(idx - 1));
+  next.addEventListener('click', () => go(idx + 1));
+  dots.forEach(d => d.addEventListener('click', () => go(Number(d.dataset.idx))));
+
+  function onDown(e) {
+    if (!mq.matches) return;
+    dragging = true;
+    dragStartX = e.touches ? e.touches[0].clientX : e.clientX;
+    dragDx = 0;
+    track.style.transition = 'none';
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    dragDx = x - dragStartX;
+    const width = track.parentElement.clientWidth;
+    const pct = (dragDx / width) * 100;
+    track.style.transform = `translateX(calc(${-idx * 100}% + ${pct}%))`;
+  }
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    const width = track.parentElement.clientWidth;
+    const threshold = width * 0.18;
+    if (dragDx < -threshold) go(idx + 1);
+    else if (dragDx > threshold) go(idx - 1);
+    else go(idx);
+    dragDx = 0;
+  }
+
+  track.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  track.addEventListener('touchstart', onDown, { passive: true });
+  track.addEventListener('touchmove', onMove, { passive: true });
+  track.addEventListener('touchend', onUp);
+
+  // Reset to the first card when crossing the breakpoint.
+  mq.addEventListener('change', () => { idx = 0; go(0); });
   go(0);
 }
 

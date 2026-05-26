@@ -311,59 +311,6 @@ const PILLAR_LABELS_FULL = {
   adoption: 'Literacy',
 };
 
-export function renderScorecard({ roi, maturityLabel, sectorLabel, headcountLabel }) {
-  const pillarsSorted = Object.entries(roi.pillarBreakdown)
-    .sort(([, a], [, b]) => b.value - a.value);
-
-  const pillarRowsHtml = pillarsSorted.map(([key, data]) => {
-    const tier = riskTier(data.gapScore);
-    return `
-      <div class="pillar-row pillar-row--${tier}">
-        <div class="pillar-row__left">
-          <div class="pillar-row__label">${PILLAR_LABELS_FULL[key]}</div>
-          <div class="pillar-row__risk">${riskLabel(tier)}</div>
-        </div>
-        <div class="pillar-row__value">${fmtCurrency(data.value)}</div>
-      </div>
-    `;
-  }).join('');
-
-  const maturityScores = {};
-  for (const [key, data] of Object.entries(roi.pillarBreakdown)) {
-    maturityScores[key] = Math.max(0.1, 1 - data.gapScore);
-  }
-
-  return `
-    <section class="screen">
-      <div class="scorecard">
-        <div class="scorecard__header">
-          <div>
-            <div class="scorecard__eyebrow">Estimated Annual Value at Risk</div>
-            <div class="scorecard__total">${fmtCurrency(roi.totalValueAtRisk)}</div>
-            <div class="scorecard__context">Range: ${fmtCurrency(roi.displayRange.low)} – ${fmtCurrency(roi.displayRange.high)}</div>
-          </div>
-          <div style="text-align:right">
-            <div class="scorecard__maturity-label">Overall Maturity</div>
-            <div class="scorecard__maturity-badge">${maturityLabel}</div>
-            <div style="font-size:10px;color:#888;margin-top:6px">${sectorLabel} · ${headcountLabel} employees</div>
-          </div>
-        </div>
-        <div class="scorecard__body">
-          <div>${renderSpiderChart(maturityScores)}</div>
-          <div class="scorecard__pillars">
-            <div class="scorecard__pillars-title">Value at Risk by Pillar</div>
-            ${pillarRowsHtml}
-          </div>
-        </div>
-        <div class="scorecard__footer">
-          <button class="scorecard__methodology" id="methodology-link">Based on Gartner, IDC & Forrester benchmarks · View methodology</button>
-          <button class="btn btn--primary" id="see-recommendations">See Recommendations →</button>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
 const RECOMMENDATIONS_BY_PILLAR = {
   productivity: {
     issue: 'Teams are spending significant time finding, validating and reconciling data — creating a compounding drag on output across the organisation.',
@@ -414,58 +361,6 @@ const RECOMMENDATIONS_BY_PILLAR = {
     ],
   },
 };
-
-export function renderRecommendations({ roi }) {
-  const topThree = Object.entries(roi.pillarBreakdown)
-    .sort(([, a], [, b]) => b.value - a.value)
-    .slice(0, 3);
-
-  const cardsHtml = topThree.map(([key, data]) => {
-    const tier = data.gapScore >= 0.70 ? 'high' : 'mod';
-    const rec = RECOMMENDATIONS_BY_PILLAR[key];
-    return `
-      <div class="issue-card issue-card--${tier}">
-        <div class="issue-card__head">
-          <span class="issue-card__badge">${tier === 'high' ? 'High Risk' : 'Moderate Risk'}</span>
-          <div class="issue-card__title">${PILLAR_LABELS_FULL[key]} — ${fmtCurrency(data.value)} at risk</div>
-        </div>
-        <div class="issue-card__body">
-          <div class="issue-card__heading">Issue</div>
-          <div class="issue-card__text">${rec.issue}</div>
-          <div class="issue-card__heading">What needs to happen</div>
-          <ul class="issue-card__actions">
-            ${rec.actions.map(a => `<li>${a}</li>`).join('')}
-          </ul>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <section class="screen">
-      <div class="recommendations">
-        <div class="recommendations__header">
-          <div>
-            <div class="scorecard__eyebrow">Your Priority Actions</div>
-            <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.3;margin-top:4px">3 areas need immediate attention</div>
-          </div>
-          <div style="font-size:11px;color:#888">Based on your responses</div>
-        </div>
-        <div class="recommendations__body">${cardsHtml}</div>
-        <div class="recommendations__secondary-actions">
-          <button class="btn btn--ghost" id="start-over">Start Over</button>
-        </div>
-        <div class="recommendations__cta-footer">
-          <div>
-            <div class="recommendations__cta-text">Ready to close the gap?</div>
-            <div class="recommendations__cta-sub">PwC's Data Governance Advisory team works with APAC organisations to turn these findings into action.</div>
-          </div>
-          <button class="btn btn--primary" id="talk-to-pwc">Talk to PwC →</button>
-        </div>
-      </div>
-    </section>
-  `;
-}
 
 export function renderReport({ roi, maturityLabel, sectorLabel, headcountLabel }) {
   const pillarsSorted = Object.entries(roi.pillarBreakdown)
@@ -521,6 +416,10 @@ export function renderReport({ roi, maturityLabel, sectorLabel, headcountLabel }
     `;
   }).join('');
 
+  const priorityDotsHtml = topThree.map((_, i) =>
+    `<button class="wf-dot${i === 0 ? ' wf-dot--active' : ''}" data-idx="${i}" aria-label="Priority ${i + 1}"></button>`
+  ).join('');
+
   return `
     <section class="screen report-screen">
       <div class="report">
@@ -530,7 +429,7 @@ export function renderReport({ roi, maturityLabel, sectorLabel, headcountLabel }
             <div class="report__total">${fmtCurrency(roi.totalValueAtRisk)}</div>
             <div class="report__range">Indicative range: ${fmtCurrency(roi.displayRange.low)} – ${fmtCurrency(roi.displayRange.high)}</div>
           </div>
-          <div style="text-align:right">
+          <div class="report__header-right">
             <div class="scorecard__maturity-label">Overall Maturity</div>
             <div class="scorecard__maturity-badge">${maturityLabel}</div>
             <div style="font-size:10px;color:#888;margin-top:6px">${sectorLabel} · ${headcountLabel} employees</div>
@@ -545,7 +444,14 @@ export function renderReport({ roi, maturityLabel, sectorLabel, headcountLabel }
         </div>
         <div class="report__priorities">
           <div class="report__priorities-title">Top 3 priority areas</div>
-          <div class="report__cards">${priorityCardsHtml}</div>
+          <div class="report__cards-viewport">
+            <div class="report__cards" id="report-cards-track">${priorityCardsHtml}</div>
+          </div>
+          <div class="report__cards-controls" id="report-cards-controls">
+            <button class="wf-carousel__btn" id="report-prev" aria-label="Previous">‹</button>
+            <div class="wf-carousel__dots">${priorityDotsHtml}</div>
+            <button class="wf-carousel__btn" id="report-next" aria-label="Next">›</button>
+          </div>
         </div>
         <div class="report__footer">
           <button class="report__methodology" id="methodology-link">Based on Gartner, IDC &amp; Forrester benchmarks · View methodology</button>

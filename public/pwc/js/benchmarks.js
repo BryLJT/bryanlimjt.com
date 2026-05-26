@@ -10,7 +10,7 @@ export const SECTOR_MULTIPLIER = {
   'healthcare': 1.15,
   'energy-utilities': 1.10,
   'government': 1.00,
-  'retail-consumer': 0.95,
+  'retail-consumer': 1.15,
   'other': 1.00,
 };
 
@@ -32,7 +32,7 @@ export const PILLAR_WEIGHTS = {
 // value at risk — advanced orgs have already captured value, so their risk is
 // scaled down.
 export const MATURITY_DAMPENER = {
-  'ad-hoc': 1.00,
+  'ad-hoc': 1.10,
   'developing': 0.90,
   'defined': 0.75,
   'advanced': 0.55,

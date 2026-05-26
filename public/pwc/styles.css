@@ -169,7 +169,7 @@ html, body {
 
 .slider-levels {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-top: 16px;
 }
@@ -181,6 +181,10 @@ html, body {
   border-radius: var(--radius);
   text-align: center;
   cursor: pointer;
+  min-width: 0;
+  /* Break a word only if it genuinely can't fit the box (avoids the aggressive
+     mid-word breaks that 'anywhere' produced on narrow columns). */
+  overflow-wrap: break-word;
 }
 
 .slider-level--active {
@@ -427,7 +431,17 @@ html, body {
 }
 
 @media (max-width: 800px) {
-  .welcome-screen { flex-direction: column; }
+  /* Guard against horizontal-overflow slivers across the whole mobile range
+     (the ≤600 query also sets this; here it covers the 600–800 band where the
+     welcome layout is already stacked). Safe because welcome__right is static
+     — not sticky — below 800px, so clipping won't break sticky positioning. */
+  body { overflow-x: hidden; }
+
+  /* Stack the two panels and let them stretch to full width. The base rule uses
+     align-items: flex-start to top-align the side-by-side columns on desktop;
+     in the stacked layout that same rule stops the panels filling the width. */
+  .welcome-screen { flex-direction: column; align-items: stretch; }
+  .welcome__left { width: 100%; }
   .welcome__orange-hero { padding: 52px 32px 48px; }
   .welcome__dark-content { padding: 48px 32px 64px; }
   .welcome__headline { font-size: 38px; }
@@ -833,7 +847,7 @@ html, body {
   padding-top: 32px;
 }
 
-.report { width: 100%; max-width: 980px; }
+.report { width: 100%; max-width: 1200px; }
 
 .report__header {
   background: var(--pwc-midnight);
@@ -915,6 +929,36 @@ html, body {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
+
+/* Carousel controls — hidden on desktop, shown only on mobile (see 600px query).
+   Layout (centring + spacing) lives here so it applies the moment display flips. */
+.report__cards-controls {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+/* Light-theme overrides: the welcome carousel controls are styled for a dark
+   background; the priority section is light, so recolour for contrast. */
+.report__cards-controls .wf-carousel__btn {
+  border-color: rgba(45,41,38,0.18);
+  background: #fff;
+  color: var(--pwc-midnight);
+}
+
+.report__cards-controls .wf-dot { background: rgba(45,41,38,0.2); }
+
+/* Report spider chart: responsive + centred (fixes mobile off-centre clip) */
+.report-spider {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.report__header-right { text-align: right; }
 
 @media (max-width: 820px) {
   .report__cards { grid-template-columns: 1fr; }
@@ -1288,7 +1332,19 @@ html, body {
 @media (max-width: 600px) {
   body { overflow-x: hidden; }
 
+  /* Reclaim the wide desktop side padding on phones so content uses more of the
+     screen — widens the slider track + its 5-box row (which stay aligned).
+     Excludes the welcome screen, which manages its own full-bleed layout. */
+  .screen:not(.welcome-screen) { padding-left: 16px; padding-right: 16px; }
+  .slider-levels { gap: 6px; }
+
   .welcome__dark-content { overflow: hidden; }
+
+  /* Keep the three stats on one tidy row (default flex-wrap strands the third
+     on its own line). Equal columns, tighter gap, labels use the column width. */
+  .welcome__stats { gap: 14px; flex-wrap: nowrap; }
+  .welcome__stat { flex: 1; min-width: 0; }
+  .welcome__stat-label { max-width: none; }
 
   .wf-slide { padding: 30px 24px 32px; min-height: 240px; }
   .wf-slide__title { font-size: 20px; }
@@ -1307,6 +1363,24 @@ html, body {
   }
 
   .report__header { flex-direction: column; gap: 6px; }
+  .report__header-right { text-align: left; }
 
-  .priority-cards { grid-template-columns: 1fr; }
+  /* Priority cards become a swipeable carousel on phones */
+  .report__cards-viewport { overflow: hidden; }
+  .report__cards {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    will-change: transform;
+  }
+  /* Each card is EXACTLY one viewport wide — flex-basis 100% caps the width so
+     the text wraps instead of forcing the card wider than the screen (which was
+     why arrows only advanced a fraction of a card). */
+  .report__cards .priority-card {
+    flex: 0 0 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .report__cards-controls { display: flex; }
 }
