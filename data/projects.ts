@@ -57,4 +57,13 @@ export const projects: Project[] = [
     tags: ["Python", "Telegram API", "Data.gov.sg"],
     featured: true,
   },
+  {
+    id: "nutrient-analysis",
+    name: "Nutrient Analysis",
+    description: "Desktop app for clinical dietitians — looks up foods across Singapore's HPB and Australia's AFCD nutrient databases, compares values side by side, and exports to Excel for therapeutic-diet analysis.",
+    image: "/images/nutrient-analysis.jpg",
+    tags: ["Electron", "React", "TypeScript", "Node.js"],
+    github: "https://github.com/BryLJT/nutrient-scraper",
+    featured: true,
+  },
 ]
