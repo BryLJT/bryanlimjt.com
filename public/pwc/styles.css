@@ -456,6 +456,166 @@ html, body {
   .screen.screen--leaving { animation: none; }
 }
 
+/* Methodology modal -------------------------------------------------------- */
+.methodology-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(45, 41, 38, 0.55);
+  backdrop-filter: blur(3px);
+}
+.methodology-modal--open {
+  display: flex;
+  animation: methBackdrop 220ms ease both;
+}
+@keyframes methBackdrop { from { opacity: 0; } to { opacity: 1; } }
+
+.methodology-modal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100%);
+  max-height: 86vh;
+  background: #FFFDFB;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(45, 41, 38, 0.32);
+  overflow: hidden;
+  animation: methRise 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes methRise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.methodology-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(45, 41, 38, 0.06);
+  color: var(--text-primary);
+  transition: background 140ms ease, color 140ms ease;
+}
+.methodology-modal__close:hover {
+  background: rgba(253, 81, 8, 0.14);
+  color: var(--pwc-orange);
+}
+
+.methodology-modal__body {
+  overflow-y: auto;
+  padding: 44px 46px;
+  font-family: 'DM Sans', var(--font-family);
+  color: var(--text-secondary);
+  line-height: 1.62;
+  outline: none;
+}
+.methodology-modal__loading { color: var(--text-muted); font-size: 14px; }
+
+/* Rendered-markdown typography (scoped to the modal body) */
+.methodology-modal__body h1 {
+  font-family: 'Lora', var(--font-display);
+  font-size: 25px;
+  color: var(--text-primary);
+  margin: 0 0 10px;
+}
+.methodology-modal__body h2 {
+  font-size: 16px;
+  color: var(--pwc-orange);
+  margin: 30px 0 10px;
+  letter-spacing: 0.2px;
+}
+.methodology-modal__body h3 {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 22px 0 8px;
+}
+.methodology-modal__body p { margin: 0 0 12px; font-size: 14px; }
+.methodology-modal__body ul,
+.methodology-modal__body ol { margin: 0 0 14px; padding-left: 20px; font-size: 14px; }
+.methodology-modal__body li { margin-bottom: 6px; }
+.methodology-modal__body strong { color: var(--text-primary); }
+.methodology-modal__body a { color: var(--pwc-orange); }
+
+.methodology-modal__body blockquote {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  background: rgba(253, 81, 8, 0.06);
+  border-left: 3px solid var(--pwc-orange);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.methodology-modal__body blockquote p { margin: 0; }
+
+.methodology-modal__body code {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  background: rgba(45, 41, 38, 0.06);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.methodology-modal__body pre {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  background: var(--pwc-midnight);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.methodology-modal__body pre code {
+  background: none;
+  padding: 0;
+  color: #F5EDE8;
+}
+
+.methodology-modal__body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 18px;
+  font-size: 12.5px;
+}
+.methodology-modal__body th {
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: rgba(45, 41, 38, 0.04);
+  padding: 8px 10px;
+  border-bottom: 2px solid rgba(45, 41, 38, 0.12);
+}
+.methodology-modal__body td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(45, 41, 38, 0.08);
+  vertical-align: top;
+}
+.methodology-modal__body hr {
+  border: none;
+  border-top: 1px solid rgba(45, 41, 38, 0.1);
+  margin: 26px 0;
+}
+
+@media (max-width: 600px) {
+  .methodology-modal { padding: 0; }
+  .methodology-modal__panel { max-height: 100vh; border-radius: 0; width: 100%; }
+  .methodology-modal__body { padding: 56px 22px 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .methodology-modal--open,
+  .methodology-modal__panel { animation: none; }
+}
+
 @keyframes w-fadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }

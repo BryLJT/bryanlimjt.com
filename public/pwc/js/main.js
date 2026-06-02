@@ -144,9 +144,7 @@ function render() {
       sectorLabel: SECTOR_LABELS[state.responses.sector],
       headcountLabel: HEADCOUNT_LABELS[state.responses.headcount],
     });
-    document.getElementById('methodology-link').addEventListener('click', () => {
-      window.open('methodology.md', '_blank');
-    });
+    document.getElementById('methodology-link').addEventListener('click', openMethodologyModal);
     document.getElementById('talk-to-pwc').addEventListener('click', () => {
       alert('Thanks. A PwC consultant will be in touch. (CTA destination TBD)');
     });
@@ -156,6 +154,60 @@ function render() {
     wireReportCarousel();
   }
 
+}
+
+// --- Methodology modal ---------------------------------------------------
+// Fetches methodology.md once, renders it with marked, and shows it in a styled
+// in-app overlay (replaces the old window.open of raw markdown). Cached after
+// first open. Falls back to a new tab if the markdown lib failed to load.
+let methodologyHtml = null;
+
+function buildMethodologyModal() {
+  const overlay = document.createElement('div');
+  overlay.id = 'methodology-modal';
+  overlay.className = 'methodology-modal';
+  overlay.innerHTML = `
+    <div class="methodology-modal__panel" role="dialog" aria-modal="true" aria-label="Methodology and assumptions">
+      <button class="methodology-modal__close" aria-label="Close methodology">&times;</button>
+      <div class="methodology-modal__body" tabindex="-1"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeMethodologyModal(); });
+  overlay.querySelector('.methodology-modal__close').addEventListener('click', closeMethodologyModal);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('methodology-modal--open')) closeMethodologyModal();
+  });
+  return overlay;
+}
+
+async function openMethodologyModal() {
+  if (typeof marked === 'undefined') { window.open('methodology.md', '_blank'); return; } // lib failed to load
+  const overlay = document.getElementById('methodology-modal') || buildMethodologyModal();
+  const body = overlay.querySelector('.methodology-modal__body');
+  if (methodologyHtml == null) {
+    body.innerHTML = '<p class="methodology-modal__loading">Loading methodology…</p>';
+    overlay.classList.add('methodology-modal--open');
+    document.body.style.overflow = 'hidden';
+    try {
+      const res = await fetch('methodology.md');
+      methodologyHtml = marked.parse(await res.text());
+    } catch (e) {
+      methodologyHtml = '<p>Unable to load the methodology right now. Please try again.</p>';
+    }
+  } else {
+    overlay.classList.add('methodology-modal--open');
+    document.body.style.overflow = 'hidden';
+  }
+  body.innerHTML = methodologyHtml;
+  body.scrollTop = 0;
+  body.focus();
+}
+
+function closeMethodologyModal() {
+  const overlay = document.getElementById('methodology-modal');
+  if (!overlay) return;
+  overlay.classList.remove('methodology-modal--open');
+  document.body.style.overflow = '';
 }
 
 // Short pause AFTER a selection so the user sees their choice register, BEFORE
