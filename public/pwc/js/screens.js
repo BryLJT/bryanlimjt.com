@@ -8,12 +8,12 @@ function renderExplainerSpider() {
   const pt = (frac, deg) => [cx + frac * r * Math.cos(toRad(deg)), cy + frac * r * Math.sin(toRad(deg))];
 
   const pillars = [
-    { key: 'productivity', label: 'Productivity', angle: -90,  desc: 'Time lost finding, validating and reconciling data before it can be used — a compounding drag on output across every team.' },
+    { key: 'productivity', label: 'Productivity', angle: -90,  desc: 'Time lost finding, validating and reconciling data before it can be used. A compounding drag on output across every team.' },
     { key: 'growth',       label: 'Innovation',   angle: -30,  desc: 'Revenue opportunities missed because data isn\'t accessible, trusted, or used strategically. Poor governance limits AI returns before you start.' },
     { key: 'compliance',   label: 'Compliance',   angle: 30,   desc: 'Audit exposure and the escalating cost of regulatory response. Inconsistent controls across business units create ongoing risk.' },
     { key: 'adoption',     label: 'Literacy',     angle: 90,   desc: 'Decisions driven by instinct rather than data. Uneven literacy limits the return on data assets your organisation already owns.' },
     { key: 'responsibility', label: 'Accountability', angle: 150, desc: 'Unclear accountability when data quality issues arise. Problems persist and recur without defined ownership.' },
-    { key: 'efficiency',   label: 'Efficiency',   angle: 210,  desc: 'Manual processes and fragmented data handoffs that could and should be automated — operational drag at scale.' },
+    { key: 'efficiency',   label: 'Efficiency',   angle: 210,  desc: 'Manual processes and fragmented data handoffs that could and should be automated. Operational drag at scale.' },
   ];
 
   const verts = pillars.map(p => pt(1, p.angle));
@@ -86,7 +86,7 @@ export function renderWelcome() {
         <div class="welcome__orange-hero">
           <span class="welcome__eyebrow">PwC · Data Governance Business Value Calculator · APAC</span>
           <h1 class="welcome__headline">Your data has a <em>hidden cost.</em></h1>
-          <p class="welcome__desc">Find out exactly how much your organisation is losing to poor data governance — across productivity, compliance, and growth.</p>
+          <p class="welcome__desc">Find out exactly how much your organisation is losing to poor data governance across productivity, compliance, and growth.</p>
         </div>
 
         <div class="welcome__dark-content">
@@ -111,14 +111,14 @@ export function renderWelcome() {
                 <div class="wf-slide">
                   <div class="wf-slide__num">01</div>
                   <h3 class="wf-slide__title">What is Data Governance?</h3>
-                  <p class="wf-slide__text">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently — across every team, every decision, every quarter.</p>
+                  <p class="wf-slide__text">Data governance is the set of policies, processes, and accountabilities that determine how your organisation collects, manages, and uses its data. When it works, it's invisible. When it doesn't, the cost compounds silently across every team, every decision, every quarter.</p>
                 </div>
                 <div class="wf-slide">
                   <div class="wf-slide__num">02</div>
                   <h3 class="wf-slide__title">Why it matters</h3>
                   <ul class="wf-slide__list">
-                    <li>Regulators across APAC are tightening data requirements — the cost of non-compliance is rising.</li>
-                    <li>AI investment is accelerating — but AI is only as good as the data it runs on.</li>
+                    <li>Regulators across APAC are tightening data requirements. The cost of non-compliance is rising.</li>
+                    <li>AI investment is accelerating, but AI is only as good as the data it runs on.</li>
                     <li>Data breaches carry costs that dwarf the investment in prevention.</li>
                     <li>Organisations with mature governance consistently outperform on decision speed and agility.</li>
                   </ul>
@@ -126,7 +126,7 @@ export function renderWelcome() {
                 <div class="wf-slide">
                   <div class="wf-slide__num">03</div>
                   <h3 class="wf-slide__title">From governance gap to dollar figure</h3>
-                  <p class="wf-slide__text">We translate governance gaps into dollar figures — headcount, estimated labour cost, and sector multipliers applied across six pillars. The result is an indicative annual value leakage: a credible signal of where to act and how urgently.</p>
+                  <p class="wf-slide__text">We translate governance gaps into dollar figures: headcount, estimated labour cost, and sector multipliers applied across six pillars. The result is an indicative annual value leakage, a credible signal of where to act and how urgently.</p>
                 </div>
               </div>
             </div>
@@ -144,7 +144,7 @@ export function renderWelcome() {
           <div class="wf-spider-section">
             <div class="wf-section__num">04</div>
             <h3 class="wf-section__title">The assessment framework</h3>
-            <p class="wf-section__body wf-section__body--mb">Six pillars — click each segment to explore.</p>
+            <p class="wf-section__body wf-section__body--mb">Six pillars. Click each segment to explore.</p>
             ${renderExplainerSpider()}
           </div>
 
@@ -247,9 +247,13 @@ export function renderBoxQuestion({ eyebrow, question, options, selectedValue, b
 }
 
 export function renderSliderQuestion({ eyebrow, question, descriptors, currentValue, breadcrumb }) {
-  const value = currentValue ?? 3;
+  // No answer yet → the slider starts in a neutral, untouched state: no level
+  // highlighted, Next disabled, thumb resting at the midpoint but visually muted.
+  // The user "commits" by clicking a level or dragging the thumb.
+  const hasValue = currentValue != null;
+  const thumbValue = currentValue ?? 3;
   const levelsHtml = descriptors.map(d => `
-    <div class="slider-level ${d.num === value ? 'slider-level--active' : ''}" data-value="${d.num}">
+    <div class="slider-level ${d.num === currentValue ? 'slider-level--active' : ''}" data-value="${d.num}">
       <div class="slider-level__num">${d.num}</div>
       <div class="slider-level__name">${d.name}</div>
       <div class="slider-level__desc">${d.desc}</div>
@@ -263,13 +267,13 @@ export function renderSliderQuestion({ eyebrow, question, descriptors, currentVa
         <p class="eyebrow">${eyebrow}</p>
         <h2 class="question">${question}</h2>
         <p class="subtitle">Drag the slider or click a level below.</p>
-        <div class="slider-block">
-          <input type="range" min="1" max="5" value="${value}" id="slider-input" />
+        <div class="slider-block ${hasValue ? '' : 'slider-block--untouched'}" id="slider-block">
+          <input type="range" min="1" max="5" value="${thumbValue}" id="slider-input" />
           <div class="slider-levels" id="slider-levels">${levelsHtml}</div>
         </div>
         <div class="nav">
           <button class="btn btn--ghost" id="nav-back">← Back</button>
-          <button class="btn btn--primary" id="nav-next">Next →</button>
+          <button class="btn btn--primary" id="nav-next" ${hasValue ? '' : 'disabled'}>Next →</button>
         </div>
       </div>
     </section>
@@ -323,7 +327,7 @@ const PILLAR_LABELS_FULL = {
 
 const RECOMMENDATIONS_BY_PILLAR = {
   productivity: {
-    issue: 'Teams are spending significant time finding, validating and reconciling data — creating a compounding drag on output across the organisation.',
+    issue: 'Teams are spending significant time finding, validating and reconciling data, creating a compounding drag on output across the organisation.',
     recommendation: 'Establish a single authoritative data layer with designated ownership and automated quality checks.',
     actions: [
       'Appoint domain data owners and publish one trusted source per high-use dataset.',
@@ -331,7 +335,7 @@ const RECOMMENDATIONS_BY_PILLAR = {
     ],
   },
   efficiency: {
-    issue: 'Manual and fragmented data processes are slowing down operations — workflows that could be automated are still handled by people, at scale.',
+    issue: 'Manual and fragmented data processes are slowing down operations. Workflows that could be automated are still handled by people, at scale.',
     recommendation: 'Map, prioritise, and systematically automate your highest-frequency data workflows.',
     actions: [
       'Inventory manual data workflows and rank by frequency and time cost.',
@@ -339,7 +343,7 @@ const RECOMMENDATIONS_BY_PILLAR = {
     ],
   },
   growth: {
-    issue: 'Data is not being used as a strategic asset — opportunities for revenue growth and market differentiation are slipping past unrecognised.',
+    issue: 'Data is not being used as a strategic asset. Opportunities for revenue growth and market differentiation are slipping past unrecognised.',
     recommendation: 'Align data assets directly to commercial priorities and embed analytics into key decisions.',
     actions: [
       'Stand up an analytics capability tied to pricing, customer, and product decisions.',
@@ -355,7 +359,7 @@ const RECOMMENDATIONS_BY_PILLAR = {
     ],
   },
   responsibility: {
-    issue: 'When data issues arise, accountability is unclear — issues persist longer than they should and recur across the organisation.',
+    issue: 'When data issues arise, accountability is unclear. Issues persist longer than they should and recur across the organisation.',
     recommendation: 'Formalise data ownership roles by business domain and establish incident response protocols.',
     actions: [
       'Assign accountable data owners to each business domain with clear escalation paths.',
@@ -363,7 +367,7 @@ const RECOMMENDATIONS_BY_PILLAR = {
     ],
   },
   adoption: {
-    issue: 'Data literacy is uneven — too many decisions still rely on instinct rather than the data you already have.',
+    issue: 'Data literacy is uneven. Too many decisions still rely on instinct rather than the data you already have.',
     recommendation: 'Build a structured data literacy programme and embed self-serve analytics into daily workflows.',
     actions: [
       'Roll out role-based data literacy training with measurable competency targets.',

@@ -148,7 +148,7 @@ function render() {
       window.open('methodology.md', '_blank');
     });
     document.getElementById('talk-to-pwc').addEventListener('click', () => {
-      alert('Thanks — a PwC consultant will be in touch. (CTA destination TBD)');
+      alert('Thanks. A PwC consultant will be in touch. (CTA destination TBD)');
     });
     document.getElementById('start-over').addEventListener('click', () => {
       window.location.reload();
@@ -158,11 +158,31 @@ function render() {
 
 }
 
-const AUTO_ADVANCE_MS = 220;
+// Short pause AFTER a selection so the user sees their choice register, BEFORE
+// the screen starts fading out. The visible "delay" between questions is mostly
+// the fade-out + fade-in animation, not a frozen wait — that's what stops it
+// feeling laggy.
+const AUTO_ADVANCE_MS = 180;
+// Slider drag-release gets a longer settle than a discrete box click, so a user
+// lifting and re-grabbing the thumb to fine-tune isn't whisked to the next question.
+const SLIDER_ADVANCE_MS = 360;
+const FADE_OUT_MS = 260; // must match the .screen--leaving animation in styles.css
 
-function scheduleAutoAdvance(timerRef) {
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Crossfade between screens: fade the current screen out, then swap and let CSS
+// fade the new one in. changeFn mutates state (state.next / state.back) between
+// the two halves. Continuous motion reads as a smooth transition, not a freeze.
+function transitionTo(changeFn) {
+  const screen = container.querySelector('.screen');
+  if (!screen || prefersReducedMotion) { changeFn(); render(); return; }
+  screen.classList.add('screen--leaving');
+  setTimeout(() => { changeFn(); render(); }, FADE_OUT_MS);
+}
+
+function scheduleAutoAdvance(timerRef, delay = AUTO_ADVANCE_MS) {
   if (timerRef.id) clearTimeout(timerRef.id);
-  timerRef.id = setTimeout(() => { state.next(); render(); }, AUTO_ADVANCE_MS);
+  timerRef.id = setTimeout(() => transitionTo(() => state.next()), delay);
 }
 
 function wireSizingScreen() {
@@ -185,8 +205,8 @@ function wireSizingScreen() {
   });
 
   checkComplete();
-  nextBtn.addEventListener('click', () => { state.next(); render(); });
-  backBtn.addEventListener('click', () => { state.back(); render(); });
+  nextBtn.addEventListener('click', () => transitionTo(() => state.next()));
+  backBtn.addEventListener('click', () => transitionTo(() => state.back()));
 }
 
 function wirePillarBoxScreen(pillar, qIdx) {
@@ -204,33 +224,46 @@ function wirePillarBoxScreen(pillar, qIdx) {
   });
   const existing = state.responses[pillar][qIdx];
   if (existing) nextBtn.disabled = false;
-  nextBtn.addEventListener('click', () => { clearTimeout(timer.id); state.next(); render(); });
-  backBtn.addEventListener('click', () => { clearTimeout(timer.id); state.back(); render(); });
+  nextBtn.addEventListener('click', () => { clearTimeout(timer.id); transitionTo(() => state.next()); });
+  backBtn.addEventListener('click', () => { clearTimeout(timer.id); transitionTo(() => state.back()); });
 }
 
 function wireSliderScreen(pillar, qIdx) {
   const input = document.getElementById('slider-input');
   const levels = document.getElementById('slider-levels');
+  const block = document.getElementById('slider-block');
   const nextBtn = document.getElementById('nav-next');
   const backBtn = document.getElementById('nav-back');
+  const timer = { id: null };
 
+  // Records the answer + paints the UI as "committed". No auto-advance here.
+  // The caller decides whether/when to advance, because dragging fires this on
+  // every input event while a box click fires it once.
   function setValue(val) {
     input.value = val;
+    block.classList.remove('slider-block--untouched');
     levels.querySelectorAll('.slider-level').forEach(el => {
       el.classList.toggle('slider-level--active', Number(el.dataset.value) === val);
     });
+    nextBtn.disabled = false;
     state.recordResponse(pillar, qIdx, { type: 'slider', value: val });
   }
 
-  if (!state.responses[pillar][qIdx]) setValue(3);
-
-  input.addEventListener('input', e => setValue(Number(e.target.value)));
+  // Box click = a single discrete commit → advance on the standard short beat.
   levels.querySelectorAll('.slider-level').forEach(el => {
-    el.addEventListener('click', () => setValue(Number(el.dataset.value)));
+    el.addEventListener('click', () => {
+      setValue(Number(el.dataset.value));
+      scheduleAutoAdvance(timer);
+    });
   });
 
-  nextBtn.addEventListener('click', () => { state.next(); render(); });
-  backBtn.addEventListener('click', () => { state.back(); render(); });
+  // Drag: paint live on every `input` for feedback, but only advance once the
+  // user releases the thumb (`change` fires on release), after a longer settle.
+  input.addEventListener('input', e => setValue(Number(e.target.value)));
+  input.addEventListener('change', () => scheduleAutoAdvance(timer, SLIDER_ADVANCE_MS));
+
+  nextBtn.addEventListener('click', () => { clearTimeout(timer.id); transitionTo(() => state.next()); });
+  backBtn.addEventListener('click', () => { clearTimeout(timer.id); transitionTo(() => state.back()); });
 }
 
 function wireWelcomeCarousel() {

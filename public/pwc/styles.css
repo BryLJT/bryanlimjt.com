@@ -165,7 +165,13 @@ html, body {
 .slider-block input[type=range] {
   width: 100%;
   accent-color: var(--pwc-orange);
+  transition: opacity 160ms ease;
 }
+
+/* Neutral "not answered yet" state: mute the track/thumb and levels until the
+   user commits by clicking a level or dragging the slider. */
+.slider-block--untouched input[type=range] { opacity: 0.4; }
+.slider-block--untouched .slider-levels { opacity: 0.7; }
 
 .slider-levels {
   display: grid;
@@ -418,6 +424,36 @@ html, body {
   color: var(--text-muted);
   line-height: 1.65;
   text-align: center;
+}
+
+/* Crossfade between questions. transitionTo() in main.js adds .screen--leaving to
+   fade the current screen OUT, then swaps the DOM; the fresh .screen fades IN via
+   the rule below (replays automatically on each innerHTML render). Scoped away
+   from the welcome screen, which has its own w-fadeUp/w-fadeLeft choreography. */
+@keyframes screenFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes screenFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-12px); }
+}
+
+.screen:not(.welcome-screen) {
+  animation: screenFadeIn 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Equal specificity to the fade-in rule, declared after it, so the exit
+   animation wins while the screen is leaving. Duration must match FADE_OUT_MS. */
+.screen.screen--leaving {
+  animation: screenFadeOut 260ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  pointer-events: none; /* ignore clicks during the exit */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen:not(.welcome-screen),
+  .screen.screen--leaving { animation: none; }
 }
 
 @keyframes w-fadeUp {

@@ -32,26 +32,26 @@ Annual labour cost is the base multiplier for the ROI calculation. It is derived
 
 ## 3. Response-to-Gap Mapping
 
-Each response maps non-linearly to a "gap score" — the proportion of pillar value at risk:
+Each response maps non-linearly to a "gap score", the proportion of pillar value at risk:
 
 **4-point box (best → worst):** 5% / 25% / 55% / 80%
 **1–5 slider (best → worst):** 5% / 20% / 40% / 60% / 80%
 
-The non-linear distribution reflects that the move from "developing" to "ad hoc" carries disproportionate risk — gaps compound.
+The non-linear distribution reflects that the move from "developing" to "ad hoc" carries disproportionate risk. Gaps compound.
 
 **Source to validate:** Gartner Data Quality Market Survey; IBM Cost of Poor Data Quality studies.
 
 ## 4. Pillar Benchmark Weights
 
-Each pillar carries a weight expressed as a proportion of annual labour cost — the maximum value at risk for that pillar:
+Each pillar carries a weight expressed as a proportion of annual labour cost, the maximum value at risk for that pillar:
 
 | Pillar | Weight | Primary source |
 |---|---|---|
 | Productivity | 18% | Gartner: "employees spend 20–25% of time on data quality tasks" |
 | Efficiency | 15% | IDC: "data friction costs average 21% of productivity" |
-| Growth / Innovation | 12% | Forrester: "data-driven firms grow 30% faster — delta applied" |
+| Growth / Innovation | 12% | Forrester: "data-driven firms grow 30% faster" (delta applied) |
 | Control / Compliance | 10% | IBM: regulatory response costs avg 10–15% of IT spend |
-| Accountability | 8% | Gartner: "data incidents cost avg $3.86M — normalised to labour" |
+| Accountability | 8% | Gartner: "data incidents cost avg $3.86M" (normalised to labour) |
 | Adoption / Literacy | 10% | McKinsey: "data literacy gap reduces workforce effectiveness by 10–12%" |
 
 **All weights require primary source verification before external use.**
@@ -82,7 +82,7 @@ total_value_at_risk = Σ(pillar_value_at_risk)
 display_range = total_value_at_risk × [0.85, 1.15]
 ```
 
-The ±15% display range reflects estimation uncertainty — it is a design choice for credibility, not a statistical confidence interval.
+The ±15% display range reflects estimation uncertainty. It is a design choice for credibility, not a statistical confidence interval.
 
 ## 7. Scope Limitations
 

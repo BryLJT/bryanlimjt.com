@@ -103,7 +103,7 @@ export const PILLAR_QUESTIONS = {
       options: [
         { value: 0, label: 'Days', sublabel: 'Fast, trusted data on demand' },
         { value: 1, label: 'Weeks', sublabel: 'Manageable but requires effort' },
-        { value: 2, label: 'Months', sublabel: 'Major delays — slows decisions' },
+        { value: 2, label: 'Months', sublabel: 'Major delays that slow decisions' },
         { value: 3, label: "We often can't", sublabel: 'Data simply is not available in time' },
       ],
     },
