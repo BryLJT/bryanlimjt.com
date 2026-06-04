@@ -78,9 +78,11 @@ Where `pillar_gap_score` is the average of the two question gap scores.
 
 Total ROI:
 ```
-total_value_at_risk = Σ(pillar_value_at_risk)
+total_value_at_risk = Σ(pillar_value_at_risk) × 0.1
 display_range = total_value_at_risk × [0.85, 1.15]
 ```
+
+The final number is scaled down to one-tenth of the raw model output, as requested by Ronald.
 
 The ±15% display range reflects estimation uncertainty. It is a design choice for credibility, not a statistical confidence interval.
 

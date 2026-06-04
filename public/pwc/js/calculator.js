@@ -16,6 +16,12 @@ const HEADCOUNT_MIDPOINT = {
 
 const DISPLAY_RANGE_PERCENT = 0.15;
 
+// Conservative calibration: the headline value at risk is scaled to 1/10 of the
+// raw model output to keep the figure credible and indicative rather than
+// alarmingly large. Applied uniformly per pillar, so the breakdown still sums to
+// the (scaled) total and the ±range is unaffected as a proportion.
+const OUTPUT_SCALE = 0.1;
+
 export function responseToGap(response) {
   if (response.type === 'box') {
     const gap = BOX_GAP_SCORES[response.value];
@@ -78,7 +84,7 @@ export function calculateROI(responses) {
       pillarWeight: PILLAR_WEIGHTS[pillarKey],
       pillarGap: gap,
     });
-    const dampenedValue = rawValue * dampener;
+    const dampenedValue = rawValue * dampener * OUTPUT_SCALE;
     pillarBreakdown[pillarKey] = { value: dampenedValue, gapScore: gap };
     totalValueAtRisk += dampenedValue;
   }
