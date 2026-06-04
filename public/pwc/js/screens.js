@@ -96,7 +96,7 @@ export function renderWelcome() {
               <span class="welcome__stat-label">Governance pillars assessed</span>
             </div>
             <div class="welcome__stat">
-              <span class="welcome__stat-num">$M</span>
+              <span class="welcome__stat-num">$</span>
               <span class="welcome__stat-label">Data governance ROI, quantified</span>
             </div>
             <div class="welcome__stat">
