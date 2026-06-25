@@ -49,17 +49,45 @@ function project(
 
 type MarkerPos = { x: number; y: number; visible: boolean }
 
+// Callout elbow geometry — shared by initial render and the per-frame updater
+const ELBOW_ANGLE = 30 * Math.PI / 180
+const ELBOW_LEN   = 80
+const HORIZ_LEN   = 110
+
+function callout(x: number, y: number) {
+  const isRight = x > GLOBE_SIZE / 2
+  const sign    = isRight ? 1 : -1
+  const ex = x + sign * ELBOW_LEN * Math.cos(ELBOW_ANGLE)
+  const ey = y - ELBOW_LEN * Math.sin(ELBOW_ANGLE)
+  const hx = ex + sign * HORIZ_LEN
+  const hy = ey
+  return { isRight, sign, ex, ey, hx, hy }
+}
+
+// DOM handles for one marker's SVG pieces, mutated imperatively each frame
+type MarkerEls = {
+  g:    SVGGElement | null
+  poly: SVGPolylineElement | null
+  dot:  SVGCircleElement | null
+  text: SVGTextElement | null
+  hit:  SVGCircleElement | null
+}
+
 export default function Globe() {
-  const router    = useRouter()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const globeRef  = useRef<ReturnType<typeof createGlobe> | null>(null)
+  const router       = useRouter()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef    = useRef<HTMLCanvasElement>(null)
+  const globeRef     = useRef<ReturnType<typeof createGlobe> | null>(null)
   const pointerInteracting         = useRef<number | null>(null)
   const pointerInteractionMovement = useRef(0)
   const phiRef = useRef(1.5)
   const rafRef = useRef<number>(0)
 
-  const [positions, setPositions] = useState<MarkerPos[]>(() =>
-    MARKERS_3D.map(p => project(p, 1.5, THETA))
+  // Per-marker DOM handles. The SVG tree is rendered once by React; the
+  // animation loop writes coordinates straight to these nodes, so a rotating
+  // globe no longer triggers a React re-render on every frame.
+  const markerEls = useRef<MarkerEls[]>(
+    MARKERS.map(() => ({ g: null, poly: null, dot: null, text: null, hit: null }))
   )
 
   // Responsive display size — globe shrinks to fit viewport on mobile
@@ -71,13 +99,71 @@ export default function Globe() {
     return () => window.removeEventListener("resize", update)
   }, [])
 
+  const showLabels = displaySize >= 600
+
+  // Mirror resize-driven state into refs so the rAF loop reads current values
+  // without re-subscribing (avoids stale closures).
+  const showLabelsRef  = useRef(showLabels)
+  const displaySizeRef = useRef(displaySize)
+  showLabelsRef.current  = showLabels
+  displaySizeRef.current = displaySize
+
+  // Imperatively position every marker's SVG pieces for the given frame.
+  const applyPositions = useCallback((positions: MarkerPos[]) => {
+    const showL = showLabelsRef.current
+    const ds    = displaySizeRef.current
+    for (let i = 0; i < positions.length; i++) {
+      const pos = positions[i]
+      const el  = markerEls.current[i]
+      if (!el || !el.g) continue
+
+      if (!pos.visible) {
+        el.g.style.display = "none"
+        continue
+      }
+      el.g.style.display = ""
+
+      const { x, y } = pos
+      const { isRight, sign, ex, ey, hx, hy } = callout(x, y)
+
+      if (showL) {
+        el.poly?.setAttribute("points", `${x},${y} ${ex},${ey} ${hx},${hy}`)
+        if (el.dot) {
+          el.dot.setAttribute("cx", String(hx))
+          el.dot.setAttribute("cy", String(hy))
+        }
+        if (el.text) {
+          el.text.setAttribute("x", String(hx + sign * 8))
+          el.text.setAttribute("y", String(hy + 5))
+          el.text.setAttribute("text-anchor", isRight ? "start" : "end")
+        }
+      } else if (el.text) {
+        el.text.setAttribute("x", String(x + sign * (18 * GLOBE_SIZE / ds)))
+        el.text.setAttribute("y", String(y + (5 * GLOBE_SIZE / ds)))
+        el.text.setAttribute("text-anchor", isRight ? "start" : "end")
+      }
+
+      if (el.hit) {
+        el.hit.setAttribute("cx", String(x))
+        el.hit.setAttribute("cy", String(y))
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (!canvasRef.current) return
 
+    // Size the WebGL drawing buffer to the actual on-screen size instead of a
+    // fixed 3600x3600. cobe sets canvas.width = opts.width * devicePixelRatio,
+    // so passing the CSS size with a 2x-capped DPR yields a sharp 1:1 buffer
+    // rather than ~4x (retina) to ~16x (non-retina) fill-rate overdraw.
+    const dpr     = Math.min(window.devicePixelRatio || 1, 2)
+    const cssSize = Math.min(GLOBE_SIZE, window.innerWidth)
+
     const globe = createGlobe(canvasRef.current, {
-      devicePixelRatio: 2,
-      width:  GLOBE_SIZE * 2,
-      height: GLOBE_SIZE * 2,
+      devicePixelRatio: dpr,
+      width:  cssSize,
+      height: cssSize,
       phi:   1.5,
       theta: THETA,
       dark:  1,
@@ -92,20 +178,42 @@ export default function Globe() {
 
     globeRef.current = globe
 
+    // Paint one static frame immediately so the globe is never blank before
+    // the animation loop starts.
+    globe.update({ phi: phiRef.current })
+    applyPositions(MARKERS_3D.map(p => project(p, phiRef.current, THETA)))
+
+    let running = false
+    let inView  = true
+
     const animate = () => {
       if (pointerInteracting.current === null) phiRef.current += 0.003
       const phi = phiRef.current + pointerInteractionMovement.current
       globe.update({ phi })
-      setPositions(MARKERS_3D.map(p => project(p, phi, THETA)))
+      applyPositions(MARKERS_3D.map(p => project(p, phi, THETA)))
       rafRef.current = requestAnimationFrame(animate)
     }
-    rafRef.current = requestAnimationFrame(animate)
+
+    // Only spend frames when the globe is actually on-screen and the tab is
+    // visible — no point rotating + rendering while it's scrolled out of view.
+    const start = () => { if (!running) { running = true; rafRef.current = requestAnimationFrame(animate) } }
+    const stop  = () => { if (running) { running = false; cancelAnimationFrame(rafRef.current) } }
+    const sync  = () => { (inView && !document.hidden) ? start() : stop() }
+
+    const io = new IntersectionObserver(
+      ([entry]) => { inView = entry.isIntersecting; sync() },
+      { threshold: 0 }
+    )
+    if (containerRef.current) io.observe(containerRef.current)
+    document.addEventListener("visibilitychange", sync)
 
     return () => {
+      io.disconnect()
+      document.removeEventListener("visibilitychange", sync)
       cancelAnimationFrame(rafRef.current)
       globe.destroy()
     }
-  }, [])
+  }, [applyPositions])
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     pointerInteracting.current = e.clientX;
@@ -134,10 +242,12 @@ export default function Globe() {
 
   const goToProjects = useCallback(() => router.push("/projects"), [router])
 
-  const showLabels = displaySize >= 600
+  // Initial coordinates (phi = 1.5) for the one-time React render. The
+  // animation loop overwrites these imperatively from the first frame.
+  const initial = MARKERS_3D.map(p => project(p, 1.5, THETA))
 
   return (
-    <div className="relative" style={{ height: displaySize, maxWidth: "100%", overflow: "visible" }}>
+    <div ref={containerRef} className="relative" style={{ height: displaySize, maxWidth: "100%", overflow: "visible" }}>
 
       {/* Top fade */}
       <div className="absolute top-0 left-0 right-0 pointer-events-none"
@@ -172,7 +282,8 @@ export default function Globe() {
         }}
       />
 
-      {/* Callout lines + labels — SVG sits exactly over the canvas */}
+      {/* Callout lines + labels — SVG sits exactly over the canvas.
+          Rendered once; positions are updated imperatively each frame. */}
       <svg
         viewBox={`0 0 ${GLOBE_SIZE} ${GLOBE_SIZE}`}
         style={{
@@ -187,69 +298,67 @@ export default function Globe() {
           zIndex: 15,
         }}
       >
-        {positions.map((pos, i) => {
-          if (!pos.visible) return null
-          const { x, y } = pos
-          const isRight = x > GLOBE_SIZE / 2
-          const sign    = isRight ? 1 : -1
-
-          const ELBOW_ANGLE = 30 * Math.PI / 180
-          const ELBOW_LEN   = 80
-          const HORIZ_LEN   = 110
-
-          const ex = x + sign * ELBOW_LEN * Math.cos(ELBOW_ANGLE)
-          const ey = y - ELBOW_LEN * Math.sin(ELBOW_ANGLE)
-
-          const hx = ex + sign * HORIZ_LEN
-          const hy = ey
-
+        {MARKERS.map((m, i) => {
+          const p0 = initial[i]
+          const c0 = callout(p0.x, p0.y)
           return (
-            <g key={i}>
+            <g
+              key={i}
+              ref={node => { markerEls.current[i].g = node }}
+              style={{ display: p0.visible ? "" : "none" }}
+            >
               {showLabels ? (
                 /* Desktop: full callout lines */
                 <>
                   <polyline
-                    points={`${x},${y} ${ex},${ey} ${hx},${hy}`}
+                    ref={node => { markerEls.current[i].poly = node }}
+                    points={`${p0.x},${p0.y} ${c0.ex},${c0.ey} ${c0.hx},${c0.hy}`}
                     fill="none"
                     stroke="rgba(251,191,36,0.5)"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-                  <circle cx={hx} cy={hy} r="3" fill="rgba(251,191,36,0.7)" />
+                  <circle
+                    ref={node => { markerEls.current[i].dot = node }}
+                    cx={c0.hx} cy={c0.hy} r="3" fill="rgba(251,191,36,0.7)"
+                  />
                   <text
-                    x={hx + sign * 8}
-                    y={hy + 5}
+                    ref={node => { markerEls.current[i].text = node }}
+                    x={c0.hx + c0.sign * 8}
+                    y={c0.hy + 5}
                     fill="rgba(251,191,36,0.9)"
                     fontSize="14"
                     fontWeight="600"
                     letterSpacing="0.04em"
-                    textAnchor={isRight ? "start" : "end"}
+                    textAnchor={c0.isRight ? "start" : "end"}
                     style={{ pointerEvents: "auto", cursor: "pointer", fontFamily: "inherit" }}
                     onClick={goToProjects}
                   >
-                    {MARKERS[i].label}
+                    {m.label}
                   </text>
                 </>
               ) : (
                 /* Mobile: simple text beside dot, font scaled to screen pixels */
                 <text
-                  x={x + sign * (18 * GLOBE_SIZE / displaySize)}
-                  y={y + (5 * GLOBE_SIZE / displaySize)}
+                  ref={node => { markerEls.current[i].text = node }}
+                  x={p0.x + c0.sign * (18 * GLOBE_SIZE / displaySize)}
+                  y={p0.y + (5 * GLOBE_SIZE / displaySize)}
                   fill="rgba(251,191,36,0.9)"
                   fontSize={11 * GLOBE_SIZE / displaySize}
                   fontWeight="600"
-                  textAnchor={isRight ? "start" : "end"}
+                  textAnchor={c0.isRight ? "start" : "end"}
                   style={{ pointerEvents: "auto", cursor: "pointer", fontFamily: "inherit" }}
                   onClick={goToProjects}
                 >
-                  {MARKERS[i].label}
+                  {m.label}
                 </text>
               )}
 
               {/* Hit target always present */}
               <circle
-                cx={x} cy={y} r={18}
+                ref={node => { markerEls.current[i].hit = node }}
+                cx={p0.x} cy={p0.y} r={18}
                 fill="transparent"
                 style={{ pointerEvents: "auto", cursor: "pointer" }}
                 onClick={goToProjects}
