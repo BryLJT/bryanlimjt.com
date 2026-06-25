@@ -17,7 +17,7 @@ export const certifications: Certification[] = [
     badge: "/images/badges/aws-saa.png",
     color: "#2A9D8F",
     description:
-      "Validates the ability to design and deploy well-architected systems on AWS — covering resilient, high-performing, secure, and cost-optimized architectures across compute, storage, networking, and databases, aligned to the AWS Well-Architected Framework. Scored 790/1000.",
+      "Validates the ability to design and deploy well-architected systems on AWS — covering resilient, high-performing, secure, and cost-optimized architectures across compute, storage, networking, and databases, aligned to the AWS Well-Architected Framework.",
   },
   {
     id: "aws-aif",
