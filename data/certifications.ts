@@ -27,7 +27,7 @@ export const certifications: Certification[] = [
     badge: "/images/badges/aws-aif.png",
     color: "#FF9900",
     description:
-      "Validates knowledge of AI, ML, and generative AI fundamentals on AWS — covering core AI/ML concepts, key AWS AI services, generative AI use cases, and responsible AI practices. Passed on first attempt.",
+      "Validates knowledge of AI, ML, and generative AI fundamentals on AWS — covering core AI/ML concepts, key AWS AI services, generative AI use cases, and responsible AI practices.",
   },
   {
     id: "azure-ai-900",
