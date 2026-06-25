@@ -11,7 +11,7 @@ export type Certification = {
 export const certifications: Certification[] = [
   {
     id: "aws-saa",
-    name: "AWS Certified Solutions Architect – Associate",
+    name: "AWS Certified Solutions Architect",
     issuer: "Amazon Web Services",
     date: "May 2026",
     badge: "/images/badges/aws-saa.png",
