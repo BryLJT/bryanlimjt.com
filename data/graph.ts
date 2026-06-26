@@ -48,8 +48,9 @@ export function buildGraphData(): GraphData {
 
   // Cross-links: certs → existing tech tags where there's real overlap
   const certLinks: Record<string, string[]> = {
+    "aws-saa":              ["tech:AWS Cloud Architecture"],
     "aws-aif":              ["tech:AWS Cloud Architecture", "tech:Python"],
-    "azure-ai-900":         [],
+    "azure-ai-900":         ["tech:Python"],
     "alteryx-designer-core": [],
   }
   for (const [certId, techIds] of Object.entries(certLinks)) {
