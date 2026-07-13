@@ -7,19 +7,19 @@ export default function About() {
 
       <div className="max-w-2xl space-y-6 text-[var(--text-muted)] text-lg leading-relaxed">
         <p>
-          I&apos;m Bryan — a builder at the intersection of business and technology, based in Singapore.
-          Incoming NUS Business student (BAIS — Business Artificial Intelligence Systems), currently
-          interning at PwC&apos;s Risk Services + AI division.
+          I&apos;m Bryan, a builder at the intersection of business and technology, based in Singapore.
+          Incoming NUS School of Computing student (BAIS, Business Artificial Intelligence Systems);
+          previously interned at PwC&apos;s Risk Services + AI division.
         </p>
         <p>
           Before tech, I spent two years doing research under NUS&apos;s Department of Microbiology and
-          Immunology — working on cancer DNA repair mechanisms and SARS-CoV-2 protein interactions.
+          Immunology, working on cancer DNA repair mechanisms and SARS-CoV-2 protein interactions.
           That research background shapes how I think: rigorously, from first principles.
         </p>
         <p>
           These days I build AI agents, tools, and products. What actually drives me is simpler than it
           sounds: I like building things. There&apos;s something genuinely satisfying about taking an idea
-          that doesn&apos;t exist yet and making it real — a working system, a tool someone actually uses,
+          that doesn&apos;t exist yet and making it real: a working system, a tool someone actually uses,
           something that solves a problem it wasn&apos;t solving before. That&apos;s what pulls me back.
         </p>
         <p> 
