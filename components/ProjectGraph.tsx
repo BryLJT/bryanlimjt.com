@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback, useMemo } from "react"
 import { buildGraphData, GraphNode, GraphLink } from "@/data/graph"
+import { createForceSim, ForceSim, SimBody } from "@/lib/forceSim"
 import { projects, Project } from "@/data/projects"
 import { certifications, Certification } from "@/data/certifications"
 
@@ -14,15 +15,7 @@ type Props = {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type SimNode = GraphNode & { x: number; y: number; vx: number; vy: number; pinned: boolean }
-
-// ─── Physics constants ────────────────────────────────────────────────────────
-
-const REPULSION     = 2000   // charge strength between every pair of nodes
-const SPRING_LENGTH = 100    // rest length for edge springs
-const SPRING_K      = 0.01   // spring stiffness
-const DAMPING       = 0.85   // velocity damping per tick
-const CENTER_PULL   = 0.003  // gentle gravity toward canvas center
+type SimNode = GraphNode & SimBody
 
 // ─── Visual helpers ───────────────────────────────────────────────────────────
 
@@ -68,34 +61,30 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
   const selectedRef     = useRef<Project | null>(null)
   const selectedCertRef = useRef<Certification | null>(null)
   const animRef         = useRef(0)
+  const simRef          = useRef<ForceSim<GraphNode> | null>(null)
 
   // Sync selected props into refs — animation loop reads refs, no restart needed
   useEffect(() => { selectedRef.current = selectedProp ?? null }, [selectedProp])
   useEffect(() => { selectedCertRef.current = selectedCertProp ?? null }, [selectedCertProp])
 
-  // ── Init nodes ───────────────────────────────────────────────────────────────
+  // ── Init simulation ──────────────────────────────────────────────────────────
   useEffect(() => {
     const rect = canvasRef.current?.getBoundingClientRect()
     const w = rect?.width ?? 800
     const h = rect?.height ?? 600
-    const n = GRAPH_DATA.nodes.length
 
-    nodesRef.current = GRAPH_DATA.nodes.map((node, i) => {
-      const angle = (2 * Math.PI * i) / n
-      const r     = 150 + Math.random() * 80
-      return {
-        ...node,
-        x:      w / 2 + Math.cos(angle) * r,
-        y:      h / 2 + Math.sin(angle) * r,
-        vx:     0,
-        vy:     0,
-        pinned: false,
-      }
-    })
+    // Clone: the sim mutates node objects; GRAPH_DATA stays pristine across
+    // strict-mode double-mounts
+    simRef.current = createForceSim(
+      GRAPH_DATA.nodes.map(n => ({ ...n })),
+      GRAPH_DATA.links,
+      { centerX: w / 2, centerY: h / 2 },
+    )
+    nodesRef.current = simRef.current.nodes
 
     // Build lookup map once — values are object references, so mutations are visible
     nodeMapRef.current = new Map(nodesRef.current.map(n => [n.id, n]))
-  }, [])
+  }, [GRAPH_DATA])
 
   // ── Coordinate helpers ────────────────────────────────────────────────────────
   const toWorld = useCallback((sx: number, sy: number) => {
@@ -138,52 +127,18 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
         canvas.height = h * dpr
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
         lastW = w; lastH = h
+        const sim = simRef.current
+        if (sim) { sim.config.centerX = w / 2; sim.config.centerY = h / 2 }
       }
 
       const nodes = nodesRef.current
       const links = linksRef.current
       const nMap  = nodeMapRef.current
       const cam   = cameraRef.current
-      const cx = w / 2, cy = h / 2
 
       // ── Physics ─────────────────────────────────────────────────────────────
-      // Runs every frame with no alpha decay — continuous simulation (Obsidian feel)
-
-      // Repulsion between every pair
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i], b = nodes[j]
-          const dx = b.x - a.x, dy = b.y - a.y
-          const dist = Math.sqrt(dx * dx + dy * dy) + 0.01
-          const f  = REPULSION / (dist * dist)
-          const fx = f * dx / dist, fy = f * dy / dist
-          if (!a.pinned) { a.vx -= fx; a.vy -= fy }
-          if (!b.pinned) { b.vx += fx; b.vy += fy }
-        }
-      }
-
-      // Spring attraction along edges
-      for (const { source, target } of links) {
-        const s = nMap.get(source as string), t = nMap.get(target as string)
-        if (!s || !t) continue
-        const dx = t.x - s.x, dy = t.y - s.y
-        const dist = Math.sqrt(dx * dx + dy * dy) + 0.01
-        const f  = (dist - SPRING_LENGTH) * SPRING_K
-        const fx = f * dx / dist, fy = f * dy / dist
-        if (!s.pinned) { s.vx += fx; s.vy += fy }
-        if (!t.pinned) { t.vx -= fx; t.vy -= fy }
-      }
-
-      // Center gravity + damping + integrate
-      for (const n of nodes) {
-        if (n.pinned) { n.vx = 0; n.vy = 0; continue }
-        n.vx += (cx - n.x) * CENTER_PULL
-        n.vy += (cy - n.y) * CENTER_PULL
-        n.vx *= DAMPING
-        n.vy *= DAMPING
-        n.x += n.vx
-        n.y += n.vy
-      }
+      // Ported d3-force sim: cools to a true standstill, wakes on drag
+      simRef.current?.tick()
 
       // ── Draw ─────────────────────────────────────────────────────────────────
 
@@ -277,8 +232,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     if (pointersRef.current.size >= 2) {
       if (draggingRef.current) {
         const n = nodeMapRef.current.get(draggingRef.current)
-        if (n) n.pinned = false
+        if (n) { n.fx = null; n.fy = null }
         draggingRef.current = null
+        simRef.current?.wake(0)
       }
       panningRef.current = false
       return
@@ -288,7 +244,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     const node  = findNode(world.x, world.y)
     if (node) {
       draggingRef.current = node.id
-      node.pinned = true
+      node.fx = node.x
+      node.fy = node.y
+      simRef.current?.wake(simRef.current.config.reheatTarget)
     } else {
       panningRef.current = true
     }
@@ -326,7 +284,7 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
       const dx  = (e.clientX - lastPtrRef.current.x) / cam.zoom
       const dy  = (e.clientY - lastPtrRef.current.y) / cam.zoom
       const n   = nodeMapRef.current.get(draggingRef.current)
-      if (n) { n.x += dx; n.y += dy }
+      if (n && n.fx != null && n.fy != null) { n.fx += dx; n.fy += dy }
       lastPtrRef.current = { x: e.clientX, y: e.clientY }
       return
     }
@@ -352,8 +310,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     if (pointersRef.current.size < 2) pinchDistRef.current = null
     if (draggingRef.current) {
       const n = nodeMapRef.current.get(draggingRef.current)
-      if (n) n.pinned = false
+      if (n) { n.fx = null; n.fy = null }
       draggingRef.current = null
+      simRef.current?.wake(0)
     }
     panningRef.current = false
   }, [])

@@ -181,3 +181,22 @@ describe("link force (degree-biased springs)", () => {
     expect(() => { for (let i = 0; i < 50; i++) sim.tick() }).not.toThrow()
   })
 })
+
+import { buildGraphData } from "../data/graph"
+
+describe("whole-site graph integration", () => {
+  it("the real graph settles to sleep, spread out and finite", () => {
+    const { nodes, links } = buildGraphData()
+    const sim = createForceSim(nodes.map(n => ({ ...n })), links, { centerX: 400, centerY: 300 })
+    let ticks = 0
+    while (ticks < 5000 && !sim.isAsleep()) { sim.tick(); ticks++ }
+    expect(sim.isAsleep()).toBe(true)
+    let minX = Infinity, maxX = -Infinity
+    for (const n of sim.nodes) {
+      expect(Number.isFinite(n.x)).toBe(true)
+      expect(Number.isFinite(n.y)).toBe(true)
+      minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x)
+    }
+    expect(maxX - minX).toBeGreaterThan(100)   // layout actually expanded from the seed spiral
+  })
+})
