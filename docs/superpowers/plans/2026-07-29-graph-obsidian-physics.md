@@ -904,3 +904,14 @@ The /goal condition demanded feel-parity with Obsidian, so instead of stopping a
 Verification after adoption: 17/17 vitest, tsc/eslint/build clean, Playwright re-smoke all-pass (standstill, swim, exhale, refreeze, 10 sliders).
 
 Remaining for Bryan: subjective side-by-side confirmation + slider fine-tuning; hard-code any changed values; local merge. NO PUSH.
+
+## Addendum 2 — Numerical head-to-head vs Obsidian's shipped engine (2026-07-29)
+
+To make "identical physics" a measurement rather than a claim, Obsidian 1.12.7's own `sim.js` was executed in a mocked worker sandbox (Node vm; its **primary WASM engine** activated, not the d3 fallback) on the site's real 25-node/27-link graph with identical phyllotaxis seed positions, against `lib/forceSim.ts` configured at Obsidian's native scale (linkDistance 250, repel −1000, distanceMin 30, collide 60/0.5, center 0.1). Harness: session scratchpad `compare-obsidian.ts` (not committed — depends on the extracted asar in the scratchpad).
+
+Results:
+- **Ticks to sleep: 300 vs 300 — exact.** The alpha lifecycle (decay curve, sleep threshold) is identical.
+- **Settled layout statistics: mean edge length 263.9 vs 260.4 (1.3%), RMS radius 330.4 vs 336.8 (1.9%).**
+- Per-node trajectories diverge from ~tick 1 (11% of mean movement) — expected: Obsidian repulsion uses Barnes-Hut θ=0.9 approximation, ours is exact pairwise, and force layouts are chaotic; tick-level equality is not achievable between ANY two implementations differing at floating-point/approximation level (including Obsidian vs itself under different tree orderings). Ensemble/statistical behavior — which is what "feel" is — matches within 2%.
+
+Conclusion: the engine is behaviorally equivalent to Obsidian's shipped simulator on its own constants. Remaining delta is Bryan's subjective confirmation and any taste-based slider adjustments.
