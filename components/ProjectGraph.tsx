@@ -252,6 +252,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
       draggingRef.current = node.id
       node.fx = node.x
       node.fy = node.y
+      // Obsidian drag protocol: alpha jumps to the target immediately
+      // (sim.js: alpha=.3 AND alphaTarget=.3), not a gradual climb
+      simRef.current?.reheat(simRef.current.config.reheatTarget)
       simRef.current?.wake(simRef.current.config.reheatTarget)
     } else {
       panningRef.current = true

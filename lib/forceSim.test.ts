@@ -79,10 +79,35 @@ describe("core simulation", () => {
     expect(sim.isAsleep()).toBe(false)
   })
 
-  it("exposes d3 defaults", () => {
-    expect(DEFAULT_CONFIG.velocityDecay).toBeCloseTo(0.4)
-    expect(DEFAULT_CONFIG.alphaDecay).toBeCloseTo(1 - Math.pow(0.001, 1 / 300), 6)
+  it("exposes Obsidian's extracted defaults", () => {
+    expect(DEFAULT_CONFIG.velocityDecay).toBeCloseTo(0.4)                            // sim.js: vx *= .6
+    expect(DEFAULT_CONFIG.alphaDecay).toBeCloseTo(1 - Math.pow(0.001, 1 / 300), 6)   // sim.js:243
     expect(DEFAULT_CONFIG.alphaMin).toBe(0.001)
+    expect(DEFAULT_CONFIG.centerStrength).toBe(0.1)                                  // sim.js: c = .1
+    expect(DEFAULT_CONFIG.repelStrength).toBe(-160)                                  // -1000 × 0.4²
+    expect(DEFAULT_CONFIG.collideRadius).toBe(24)                                    // 60 × 0.4
+    expect(DEFAULT_CONFIG.collideStrength).toBe(0.5)
+  })
+})
+
+describe("collision force (Obsidian collide port)", () => {
+  const onlyCollide = { repelStrength: 0, centerStrength: 0, linkStrengthMult: 0 }
+
+  it("separates overlapping nodes to at least combined radii", () => {
+    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...onlyCollide })
+    const [a, b] = sim.nodes
+    a.x = 0; a.y = 0; b.x = 30; b.y = 0    // overlap: 30 < 2 × collideRadius(24) = 48
+    for (let i = 0; i < 300; i++) sim.tick()
+    expect(Math.hypot(b.x - a.x, b.y - a.y)).toBeGreaterThanOrEqual(47)
+  })
+
+  it("leaves non-overlapping nodes alone", () => {
+    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...onlyCollide })
+    const [a, b] = sim.nodes
+    a.x = 0; a.y = 0; b.x = 60; b.y = 0    // 60 > 48 — no contact
+    sim.tick()
+    expect(a.vx).toBe(0)
+    expect(b.vx).toBe(0)
   })
 })
 
@@ -98,9 +123,10 @@ describe("repulsion (manyBody port)", () => {
   })
 
   it("exerts nothing beyond repelDistanceMax", () => {
-    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...noOther })
+    // Obsidian uses no distanceMax (default here is effectively ∞) — pin 350 to test the cutoff
+    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...noOther, repelDistanceMax: 350 })
     const [a, b] = sim.nodes
-    a.x = 0; a.y = 0; b.x = 400; b.y = 0   // default repelDistanceMax is 350
+    a.x = 0; a.y = 0; b.x = 400; b.y = 0
     sim.tick()
     expect(a.vx).toBe(0)
     expect(a.vy).toBe(0)

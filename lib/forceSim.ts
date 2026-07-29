@@ -27,21 +27,33 @@ export type SimConfig = {
   linkDistance: number     // spring rest length
   linkStrengthMult: number // multiplies d3's degree-based default link strength
   centerStrength: number   // forceX/forceY positional pull
+  collideRadius: number    // collision body radius per node
+  collideStrength: number  // collision correction strength 0..1
   centerX: number
   centerY: number
 }
 
+// Defaults extracted from Obsidian 1.12.7's own graph worker (sim.js in
+// obsidian-1.12.7.asar): alpha lifecycle, velocityDecay, center 0.1,
+// linkStrength = slider × degree-default, drag = fx/fy + alpha jump 0.3.
+// Obsidian's spatial trio is linkDistance 250 / collideRadius 60 /
+// repel -1000 with repel distanceMin 30 and NO distanceMax; this graph
+// runs the same world at 0.4× (linkDistance 100), so lengths scale by
+// s = 0.4 and the repel constant by s² — trajectories stay geometrically
+// identical: repel -160, distanceMin 12, collideRadius 24.
 export const DEFAULT_CONFIG: Omit<SimConfig, "centerX" | "centerY"> = {
-  alphaDecay:       1 - Math.pow(0.001, 1 / 300),  // d3: ~300 ticks to sleep
+  alphaDecay:       1 - Math.pow(0.001, 1 / 300),  // Obsidian sim.js:243 (= d3 default)
   alphaMin:         0.001,
-  velocityDecay:    0.4,
-  reheatTarget:     0.3,
-  repelStrength:    -30,
-  repelDistanceMin: 1,
-  repelDistanceMax: 350,     // d3 default is Infinity; capped per spec, tunable
-  linkDistance:     100,     // d3 default is 30; kept at current graph density
-  linkStrengthMult: 1,
-  centerStrength:   0.05,    // d3 forceX/forceY default is 0.1; start softer
+  velocityDecay:    0.4,     // Obsidian integrates vx *= .6
+  reheatTarget:     0.3,     // Obsidian drag: alpha = alphaTarget = 0.3
+  repelStrength:    -160,    // Obsidian -1000 × s²
+  repelDistanceMin: 12,      // Obsidian 30 × s
+  repelDistanceMax: 2000,    // Obsidian has none (∞); 2000 ≫ world size ≈ none, tunable
+  linkDistance:     100,     // Obsidian 250 × s — current graph density
+  linkStrengthMult: 1,       // Obsidian default link slider = 1
+  centerStrength:   0.1,     // Obsidian default center force
+  collideRadius:    24,      // Obsidian 60 × s
+  collideStrength:  0.5,     // Obsidian collide strength (dimensionless)
 }
 
 export type ForceSim<T> = {
@@ -164,15 +176,47 @@ export function createForceSim<T extends { id: string }>(
     }
   }
 
+  // forceCollide, ported from Obsidian's sim.js fallback (= d3 collide.js,
+  // 1 iteration, uniform radius): pushes apart nodes whose PROJECTED
+  // positions (x+vx) overlap combined radii. Deliberately not alpha-scaled,
+  // matching the source — collisions resolve even as the sim cools.
+  function collide() {
+    const sum = cfg.collideRadius * 2
+    for (let i = 0; i < nodes.length; i++) {
+      const a = nodes[i]
+      const ax = a.x + a.vx, ay = a.y + a.vy
+      for (let j = i + 1; j < nodes.length; j++) {
+        const b = nodes[j]
+        let dx = ax - b.x - b.vx
+        let dy = ay - b.y - b.vy
+        let l  = dx * dx + dy * dy
+        if (l < sum * sum) {
+          if (dx === 0) { dx = jiggle(random); l += dx * dx }
+          if (dy === 0) { dy = jiggle(random); l += dy * dy }
+          l = Math.sqrt(l)
+          const f = (sum - l) / l * cfg.collideStrength
+          dx *= f
+          dy *= f
+          a.vx += dx * 0.5   // uniform radii → equal mass split
+          a.vy += dy * 0.5
+          b.vx -= dx * 0.5
+          b.vy -= dy * 0.5
+        }
+      }
+    }
+  }
+
   function tick(): boolean {
     if (asleep()) return false
 
     // simulation.js tick(): alpha eases toward its target
     alpha += (alphaTarget - alpha) * cfg.alphaDecay
 
-    repulsion()
-    linkForce()
+    // Force order matches Obsidian's fallback sim: [x, y, link, manyBody, collide]
     centering()
+    linkForce()
+    repulsion()
+    collide()
 
     // simulation.js integration: damp-then-move; fx/fy pin overrides forces
     const keep = 1 - cfg.velocityDecay

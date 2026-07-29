@@ -6,14 +6,16 @@ import { SimConfig } from "@/lib/forceSim"
 type TunableKey = Exclude<keyof SimConfig, "centerX" | "centerY" | "alphaMin" | "repelDistanceMin">
 
 const SLIDERS: { key: TunableKey; label: string; min: number; max: number; step: number }[] = [
-  { key: "repelStrength",    label: "Repel strength",  min: -200,  max: 0,   step: 1     },
-  { key: "repelDistanceMax", label: "Repel max dist",  min: 50,    max: 1000, step: 10   },
-  { key: "linkDistance",     label: "Link distance",   min: 20,    max: 300, step: 5     },
-  { key: "linkStrengthMult", label: "Link strength ×", min: 0,     max: 3,   step: 0.05  },
-  { key: "centerStrength",   label: "Center force",    min: 0,     max: 0.3, step: 0.005 },
-  { key: "velocityDecay",    label: "Velocity decay",  min: 0,     max: 0.9, step: 0.01  },
-  { key: "alphaDecay",       label: "Alpha decay",     min: 0.001, max: 0.1, step: 0.001 },
-  { key: "reheatTarget",     label: "Drag reheat",     min: 0,     max: 1,   step: 0.05  },
+  { key: "repelStrength",    label: "Repel strength",  min: -400,  max: 0,    step: 5     },
+  { key: "repelDistanceMax", label: "Repel max dist",  min: 50,    max: 2000, step: 10    },
+  { key: "linkDistance",     label: "Link distance",   min: 20,    max: 300,  step: 5     },
+  { key: "linkStrengthMult", label: "Link strength ×", min: 0,     max: 3,    step: 0.05  },
+  { key: "centerStrength",   label: "Center force",    min: 0,     max: 0.3,  step: 0.005 },
+  { key: "collideRadius",    label: "Collide radius",  min: 0,     max: 100,  step: 1     },
+  { key: "collideStrength",  label: "Collide force",   min: 0,     max: 1,    step: 0.05  },
+  { key: "velocityDecay",    label: "Velocity decay",  min: 0,     max: 0.9,  step: 0.01  },
+  { key: "alphaDecay",       label: "Alpha decay",     min: 0.001, max: 0.1,  step: 0.001 },
+  { key: "reheatTarget",     label: "Drag reheat",     min: 0,     max: 1,    step: 0.05  },
 ]
 
 type Props = {
