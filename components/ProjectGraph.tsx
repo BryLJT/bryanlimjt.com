@@ -1,8 +1,9 @@
 "use client"
 
-import { useRef, useEffect, useCallback, useMemo } from "react"
+import { useRef, useEffect, useCallback, useMemo, useState } from "react"
 import { buildGraphData, GraphNode, GraphLink } from "@/data/graph"
 import { createForceSim, ForceSim, SimBody } from "@/lib/forceSim"
+import GraphTuningPanel from "./GraphTuningPanel"
 import { projects, Project } from "@/data/projects"
 import { certifications, Certification } from "@/data/certifications"
 
@@ -62,6 +63,10 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
   const selectedCertRef = useRef<Certification | null>(null)
   const animRef         = useRef(0)
   const simRef          = useRef<ForceSim<GraphNode> | null>(null)
+  const [showTuning, setShowTuning] = useState(false)
+  // State mirror of simRef for render-time use (reading a ref during render
+  // violates react-hooks/refs); handlers and the draw loop keep using the ref
+  const [sim, setSim] = useState<ForceSim<GraphNode> | null>(null)
 
   // Sync selected props into refs — animation loop reads refs, no restart needed
   useEffect(() => { selectedRef.current = selectedProp ?? null }, [selectedProp])
@@ -84,6 +89,7 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
 
     // Build lookup map once — values are object references, so mutations are visible
     nodeMapRef.current = new Map(nodesRef.current.map(n => [n.id, n]))
+    setSim(simRef.current)
   }, [GRAPH_DATA])
 
   // ── Coordinate helpers ────────────────────────────────────────────────────────
@@ -358,6 +364,15 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     return () => canvas.removeEventListener("wheel", handler)
   }, [])
 
+  // Dev tuning panel — press "g" on the projects page (no modifier keys)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "g" && !e.metaKey && !e.ctrlKey && !e.altKey) setShowTuning(v => !v)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+
   return (
     <div style={{ width: "100%", height: "100%", background: "#060d14", position: "relative", overflow: "hidden" }}>
       <canvas
@@ -369,6 +384,9 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
         onPointerLeave={(e) => onPointerUp(e)}
         onClick={onClick}
       />
+      {showTuning && sim && (
+        <GraphTuningPanel config={sim.config} reheat={() => sim.reheat()} />
+      )}
     </div>
   )
 }
