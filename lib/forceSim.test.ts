@@ -85,3 +85,49 @@ describe("core simulation", () => {
     expect(DEFAULT_CONFIG.alphaMin).toBe(0.001)
   })
 })
+
+describe("repulsion (manyBody port)", () => {
+  const noOther = { centerStrength: 0, linkStrengthMult: 0 }
+
+  it("pushes two nearby nodes apart", () => {
+    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...noOther })
+    const [a, b] = sim.nodes
+    const before = Math.hypot(b.x - a.x, b.y - a.y)
+    for (let i = 0; i < 50; i++) sim.tick()
+    expect(Math.hypot(b.x - a.x, b.y - a.y)).toBeGreaterThan(before)
+  })
+
+  it("exerts nothing beyond repelDistanceMax", () => {
+    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...noOther })
+    const [a, b] = sim.nodes
+    a.x = 0; a.y = 0; b.x = 400; b.y = 0   // default repelDistanceMax is 350
+    sim.tick()
+    expect(a.vx).toBe(0)
+    expect(a.vy).toBe(0)
+    expect(b.vx).toBe(0)
+    expect(b.vy).toBe(0)
+  })
+
+  it("separates exactly coincident nodes via jiggle", () => {
+    const sim = createForceSim(mkNodes(2), [], { centerX: 0, centerY: 0, ...noOther })
+    const [a, b] = sim.nodes
+    b.x = a.x; b.y = a.y
+    for (let i = 0; i < 100; i++) sim.tick()
+    expect(Math.hypot(b.x - a.x, b.y - a.y)).toBeGreaterThan(1)
+  })
+
+  it("survives a 5000-tick soak with coincident nodes — no NaN, no Infinity", () => {
+    const sim = createForceSim(mkNodes(10), [], { centerX: 0, centerY: 0 })
+    sim.nodes[1].x = sim.nodes[0].x
+    sim.nodes[1].y = sim.nodes[0].y
+    for (let i = 0; i < 5000; i++) {
+      if (!sim.tick()) { sim.reheat() }   // keep it hot for the full soak
+    }
+    for (const n of sim.nodes) {
+      expect(Number.isFinite(n.x)).toBe(true)
+      expect(Number.isFinite(n.y)).toBe(true)
+      expect(Number.isFinite(n.vx)).toBe(true)
+      expect(Number.isFinite(n.vy)).toBe(true)
+    }
+  })
+})

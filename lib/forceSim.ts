@@ -114,6 +114,32 @@ export function createForceSim<T extends { id: string }>(
 
   const asleep = () => alpha < cfg.alphaMin && alphaTarget < cfg.alphaMin
 
+  // manyBody.js (direct pairwise path): F = d * strength * alpha / l,
+  // l = SQUARED distance, with distanceMax cutoff, distanceMin clamp,
+  // and jiggle when components are exactly zero
+  function repulsion() {
+    const dMin2 = cfg.repelDistanceMin * cfg.repelDistanceMin
+    const dMax2 = cfg.repelDistanceMax * cfg.repelDistanceMax
+    for (let i = 0; i < nodes.length; i++) {
+      const a = nodes[i]
+      for (let j = i + 1; j < nodes.length; j++) {
+        const b = nodes[j]
+        let dx = b.x - a.x
+        let dy = b.y - a.y
+        let l  = dx * dx + dy * dy
+        if (l >= dMax2) continue
+        if (dx === 0) { dx = jiggle(random); l += dx * dx }
+        if (dy === 0) { dy = jiggle(random); l += dy * dy }
+        if (l < dMin2) l = Math.sqrt(dMin2 * l)
+        const w = cfg.repelStrength * alpha / l
+        a.vx += dx * w   // dx points a→b; negative strength drives a away from b
+        a.vy += dy * w
+        b.vx -= dx * w
+        b.vy -= dy * w
+      }
+    }
+  }
+
   // x.js / y.js — gentle positional pull toward the center, alpha-scaled
   function centering() {
     for (const n of nodes) {
@@ -128,6 +154,7 @@ export function createForceSim<T extends { id: string }>(
     // simulation.js tick(): alpha eases toward its target
     alpha += (alphaTarget - alpha) * cfg.alphaDecay
 
+    repulsion()
     centering()
 
     // simulation.js integration: damp-then-move; fx/fy pin overrides forces
