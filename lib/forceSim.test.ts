@@ -131,3 +131,53 @@ describe("repulsion (manyBody port)", () => {
     }
   })
 })
+
+describe("link force (degree-biased springs)", () => {
+  // Isolate links: kill repulsion + centering; alphaDecay 0 keeps alpha at 1 forever
+  const onlyLinks = { repelStrength: 0, centerStrength: 0, alphaDecay: 0 }
+
+  it("a linked pair converges to the rest length", () => {
+    const sim = createForceSim(
+      mkNodes(2),
+      [{ source: "n0", target: "n1" }],
+      { centerX: 0, centerY: 0, ...onlyLinks },
+    )
+    for (let i = 0; i < 500; i++) sim.tick()
+    const [a, b] = sim.nodes
+    expect(Math.hypot(b.x - a.x, b.y - a.y)).toBeCloseTo(sim.config.linkDistance, 0)
+  })
+
+  it("degree bias: the leaf swings, the hub resists", () => {
+    // Star: n0 is a 3-link hub, n1..n3 are leaves
+    const sim = createForceSim(
+      mkNodes(4),
+      [
+        { source: "n0", target: "n1" },
+        { source: "n0", target: "n2" },
+        { source: "n0", target: "n3" },
+      ],
+      { centerX: 0, centerY: 0, ...onlyLinks },
+    )
+    const [hub, leaf, s2, s3] = sim.nodes
+    // Explicit positions: stretched spoke on +x; other spokes AT rest length
+    // (default linkDistance 100) so they contribute zero force — the only
+    // velocities this tick come from the stretched link, making the
+    // bias ratio exact: leaf gets 3×, hub gets 1× (bias = 3/(3+1))
+    hub.x = 0;  hub.y = 0
+    leaf.x = 300; leaf.y = 0
+    s2.x = 0;  s2.y = 100
+    s3.x = 0;  s3.y = -100
+    sim.tick()
+    // Not exactly 3×: d3's link force reads position+velocity, so spokes 2/3
+    // react within the same tick to the hub's fresh velocity and damp it a
+    // little. Ratio lands ~3.2 — assert the bias band, not false precision.
+    const ratio = Math.hypot(leaf.vx, leaf.vy) / Math.hypot(hub.vx, hub.vy)
+    expect(ratio).toBeGreaterThan(2.5)
+    expect(ratio).toBeLessThan(4)
+  })
+
+  it("links to unknown ids are dropped, not fatal", () => {
+    const sim = createForceSim(mkNodes(2), [{ source: "n0", target: "ghost" }], { centerX: 0, centerY: 0 })
+    expect(() => { for (let i = 0; i < 50; i++) sim.tick() }).not.toThrow()
+  })
+})

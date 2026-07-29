@@ -107,8 +107,6 @@ export function createForceSim<T extends { id: string }>(
     bias:         count[s] / (count[s] + count[t]),
     baseStrength: 1 / Math.min(count[s], count[t]),
   }))
-  void links // consumed by the link force added in a later task
-
   let alpha       = 1
   let alphaTarget = 0
 
@@ -140,6 +138,24 @@ export function createForceSim<T extends { id: string }>(
     }
   }
 
+  // link.js force(): spring on position+velocity, corrected asymmetrically
+  // by degree bias so hubs resist and leaves swing
+  function linkForce() {
+    for (const link of links) {
+      const s = nodes[link.s], t = nodes[link.t]
+      let x = t.x + t.vx - s.x - s.vx || jiggle(random)
+      let y = t.y + t.vy - s.y - s.vy || jiggle(random)
+      let l = Math.sqrt(x * x + y * y)
+      l = (l - cfg.linkDistance) / l * alpha * link.baseStrength * cfg.linkStrengthMult
+      x *= l
+      y *= l
+      t.vx -= x * link.bias
+      t.vy -= y * link.bias
+      s.vx += x * (1 - link.bias)
+      s.vy += y * (1 - link.bias)
+    }
+  }
+
   // x.js / y.js — gentle positional pull toward the center, alpha-scaled
   function centering() {
     for (const n of nodes) {
@@ -155,6 +171,7 @@ export function createForceSim<T extends { id: string }>(
     alpha += (alphaTarget - alpha) * cfg.alphaDecay
 
     repulsion()
+    linkForce()
     centering()
 
     // simulation.js integration: damp-then-move; fx/fy pin overrides forces

@@ -489,8 +489,12 @@ describe("link force (degree-biased springs)", () => {
     s2.x = 0;  s2.y = 100
     s3.x = 0;  s3.y = -100
     sim.tick()
-    expect(Math.hypot(leaf.vx, leaf.vy)).toBeGreaterThan(2 * Math.hypot(hub.vx, hub.vy))
-    expect(Math.hypot(leaf.vx, leaf.vy)).toBeCloseTo(3 * Math.hypot(hub.vx, hub.vy), 5)
+    // Not exactly 3×: d3's link force reads position+velocity, so spokes 2/3
+    // react within the same tick to the hub's fresh velocity and damp it a
+    // little. Ratio lands ~3.2 — assert the bias band, not false precision.
+    const ratio = Math.hypot(leaf.vx, leaf.vy) / Math.hypot(hub.vx, hub.vy)
+    expect(ratio).toBeGreaterThan(2.5)
+    expect(ratio).toBeLessThan(4)
   })
 
   it("links to unknown ids are dropped, not fatal", () => {
