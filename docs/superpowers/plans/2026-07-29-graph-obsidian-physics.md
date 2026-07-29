@@ -886,3 +886,21 @@ Two deviations from the plan as written, both fixes to the PLAN, not the port:
 Verification at completion: `npx vitest run` 15/15 passing · `npx tsc --noEmit` clean · `npm run build` clean · touched files eslint-clean (4 pre-existing lint errors elsewhere on main — `app/projects/page.tsx`, `Globe.tsx` ×2, `PageTransitionWrapper.tsx` — untouched by this branch, left for housekeeping). Playwright smoke: standstill-at-rest, swim-during-drag, exhale-after-release, refreeze, detail-panel-click, panel g-toggle + live slider reheat — all pass.
 
 Remaining (requires Bryan): side-by-side tuning against his Obsidian vault; then hard-code winning values into `DEFAULT_CONFIG`; merge to main locally. NO PUSH.
+
+## Addendum — Obsidian's actual engine extracted (2026-07-29, post-plan, commit 1cf51a9)
+
+The /goal condition demanded feel-parity with Obsidian, so instead of stopping at generic d3 defaults, Obsidian 1.12.7's own graph worker was read from the installed app (`~/Library/Application Support/obsidian/obsidian-1.12.7.asar` → `sim.js`, the d3 fallback twin of their WASM sim; read-only inspection, extracted to scratchpad).
+
+**Findings adopted:**
+- alphaDecay `1−0.001^(1/300)`, alphaMin 0.001, velocityDecay 0.4 — already identical (they ARE d3's defaults).
+- Drag protocol identical to our port, plus one addition: Obsidian JUMPS alpha to 0.3 on grab (`alpha=.3, alphaTarget=.3`), not a gradual climb → added `reheat(0.3)` alongside `wake(0.3)` in onPointerDown.
+- Their alpha-message semantics (`alpha = max(current, incoming)`, `alphaTarget = incoming`) exactly match our `reheat()`/`wake()` API.
+- Center force 0.1 (was 0.05). Link strength = slider × d3 degree-default (our linkStrengthMult design, confirmed). Repel = −(slider³), default −1000, `distanceMin(30)`, NO distanceMax. Link distance 250.
+- **Collision force we lacked:** d3 forceCollide, radius 60, strength 0.5, 1 iteration, not alpha-scaled → ported.
+- Force order `[x, y, link, manyBody, collide]` → matched.
+
+**World scale:** our graph runs at 0.4× Obsidian's spatial scale (linkDistance 100 vs 250). Lengths ×0.4, force constant ×0.4²: repel −160, distanceMin 12, collideRadius 24. Trajectories are geometrically identical; sliders can take it to literal Obsidian scale.
+
+Verification after adoption: 17/17 vitest, tsc/eslint/build clean, Playwright re-smoke all-pass (standstill, swim, exhale, refreeze, 10 sliders).
+
+Remaining for Bryan: subjective side-by-side confirmation + slider fine-tuning; hard-code any changed values; local merge. NO PUSH.
