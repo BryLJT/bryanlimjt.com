@@ -36,7 +36,7 @@
   - `SimConfig` (all numeric): `alphaDecay, alphaMin, velocityDecay, reheatTarget, repelStrength, repelDistanceMin, repelDistanceMax, linkDistance, linkStrengthMult, centerStrength, centerX, centerY`
   - `DEFAULT_CONFIG: Omit<SimConfig, "centerX" | "centerY">`
 
-- [ ] **Step 1: Create branch and install test runner**
+- [x] **Step 1: Create branch and install test runner**
 
 ```bash
 cd "/Users/bryan/Desktop/claude code/bryanlimjt.com"
@@ -46,7 +46,7 @@ npm install -D vitest
 
 Then in `package.json` scripts add: `"test": "vitest run"`.
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 Create `lib/forceSim.test.ts`:
 
@@ -140,12 +140,12 @@ describe("core simulation", () => {
 })
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `npx vitest run lib/forceSim.test.ts`
 Expected: FAIL — cannot resolve `./forceSim`.
 
-- [ ] **Step 4: Implement the core module**
+- [x] **Step 4: Implement the core module**
 
 Create `lib/forceSim.ts`. Note for the reheat/wake asymmetry: `wake` moves the *target* (d3's `alphaTarget`, used by drag), `reheat` bumps *alpha itself* (used by the tuning panel to show a change instantly). `isAsleep` must be false right after `wake(0.3)` even though alpha is still tiny — the guard checks both alpha AND target, exactly like d3's timer-stop condition.
 
@@ -305,12 +305,12 @@ export function createForceSim<T extends { id: string }>(
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run lib/forceSim.test.ts`
 Expected: PASS (7 tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add lib/forceSim.ts lib/forceSim.test.ts package.json package-lock.json
@@ -331,7 +331,7 @@ git commit -m "feat: core force sim — d3 alpha lifecycle, phyllotaxis seeding,
 
 Reference source (`node_modules/d3-force-3d/src/manyBody.js`, direct-interaction branch): force on a node from another is `d * strength * alpha / l` where `d` is the component-wise offset toward the other node, `l` is the **squared** distance after (a) skipping entirely when `l >= distanceMax²`, (b) jiggling zero components, (c) clamping `l = sqrt(distanceMin² * l)` when inside `distanceMin²`. Negative strength = repel.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `lib/forceSim.test.ts`:
 
@@ -383,12 +383,12 @@ describe("repulsion (manyBody port)", () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify the new block fails**
+- [x] **Step 2: Run tests to verify the new block fails**
 
 Run: `npx vitest run lib/forceSim.test.ts`
 Expected: Task 1 tests PASS; "pushes two nearby nodes apart" and "separates exactly coincident nodes" FAIL (no repulsion yet). ("exerts nothing beyond repelDistanceMax" passes vacuously — that's fine; it guards the implementation once added.)
 
-- [ ] **Step 3: Implement repulsion**
+- [x] **Step 3: Implement repulsion**
 
 In `lib/forceSim.ts`, add below `centering()`:
 
@@ -422,12 +422,12 @@ In `lib/forceSim.ts`, add below `centering()`:
 
 In `tick()`, insert `repulsion()` immediately BEFORE `centering()` (force order: repulsion → links → centering).
 
-- [ ] **Step 4: Run tests to verify all pass**
+- [x] **Step 4: Run tests to verify all pass**
 
 Run: `npx vitest run lib/forceSim.test.ts`
 Expected: PASS (11 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/forceSim.ts lib/forceSim.test.ts
@@ -448,7 +448,7 @@ git commit -m "feat: repulsion force ported from d3 manyBody (distanceMax cutoff
 
 Reference source (`link.js` `force()`): displacement uses position PLUS velocity (`target.x + target.vx - source.x - source.vx`), falls back to jiggle when exactly zero, then `l = (l - distance) / l * alpha * strength`, applied asymmetrically: target gets `× bias`, source gets `× (1 - bias)` where `bias = count(source) / (count(source) + count(target))`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `lib/forceSim.test.ts`:
 
@@ -504,12 +504,12 @@ describe("link force (degree-biased springs)", () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify the new block fails**
+- [x] **Step 2: Run tests to verify the new block fails**
 
 Run: `npx vitest run lib/forceSim.test.ts`
 Expected: first two new tests FAIL (nodes never approach rest length; no velocities from links). "unknown ids" passes already (filtering exists from Task 1) — it pins that behavior.
 
-- [ ] **Step 3: Implement the link force**
+- [x] **Step 3: Implement the link force**
 
 In `lib/forceSim.ts`: delete the line `void links // consumed by the link force added in a later task`, and add below `repulsion()`:
 
@@ -535,12 +535,12 @@ In `lib/forceSim.ts`: delete the line `void links // consumed by the link force 
 
 In `tick()`, insert `linkForce()` between `repulsion()` and `centering()`.
 
-- [ ] **Step 4: Run tests to verify all pass**
+- [x] **Step 4: Run tests to verify all pass**
 
 Run: `npx vitest run lib/forceSim.test.ts`
 Expected: PASS (14 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/forceSim.ts lib/forceSim.test.ts
@@ -559,7 +559,7 @@ git commit -m "feat: degree-biased link force ported from d3 forceLink"
 - Consumes: `createForceSim`, `ForceSim`, `SimBody` from `lib/forceSim.ts`; `buildGraphData`, `GraphNode` from `data/graph.ts`.
 - Produces: `ProjectGraph` renders/behaves as before, driven by the new sim. Node objects in the component are now `GraphNode & SimBody` (field `pinned` no longer exists; pinning is `fx`/`fy`).
 
-- [ ] **Step 1: Write the failing integration test**
+- [x] **Step 1: Write the failing integration test**
 
 Append to `lib/forceSim.test.ts`:
 
@@ -586,7 +586,7 @@ describe("whole-site graph integration", () => {
 
 Run: `npx vitest run lib/forceSim.test.ts` — this should PASS already (it exercises Tasks 1-3 together; it exists to catch regressions during the rewiring below and to prove the real topology settles). If it fails, STOP and fix the sim before touching the component.
 
-- [ ] **Step 2: Rewire the component**
+- [x] **Step 2: Rewire the component**
 
 All edits in `components/ProjectGraph.tsx`:
 
@@ -704,7 +704,7 @@ And in `onPointerDown`'s two-finger branch, replace `if (n) n.pinned = false` wi
 
 **(i) Sweep for leftovers:** `grep -n "pinned\|REPULSION\|SPRING_\|DAMPING\|CENTER_PULL" components/ProjectGraph.tsx` must return nothing.
 
-- [ ] **Step 3: Type-check, lint, test, build**
+- [x] **Step 3: Type-check, lint, test, build**
 
 ```bash
 npx tsc --noEmit
@@ -715,7 +715,7 @@ npm run build
 
 Expected: all clean. (`GraphNode` allows optional `x?`/`y?` — the intersection with `SimBody`'s required `x`/`y` narrows to required, so draw-loop property access stays type-safe.)
 
-- [ ] **Step 4: Manual smoke check**
+- [x] **Step 4: Manual smoke check**
 
 Run: `npm run dev`, open `http://localhost:3000/projects`. Verify, in order:
 1. Load: nodes bloom outward from a small spiral and glide to a complete standstill within a few seconds.
@@ -727,7 +727,7 @@ Run: `npm run dev`, open `http://localhost:3000/projects`. Verify, in order:
 7. In browser devtools device emulation (touch): pinch-zoom works, tapping a project node opens the mobile bottom sheet, and starting a second finger mid-drag releases the dragged node (no stuck pins). Real-device check happens later in the tuning session.
 Kill the dev server when done.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add components/ProjectGraph.tsx lib/forceSim.test.ts
@@ -746,7 +746,7 @@ git commit -m "feat: drive ProjectGraph with ported d3-force sim (wake/sleep dra
 - Consumes: `SimConfig` from `lib/forceSim.ts`; `simRef` from Task 4.
 - Produces: `GraphTuningPanel({ config, reheat }: { config: SimConfig; reheat: () => void })` — default export.
 
-- [ ] **Step 1: Create the panel component**
+- [x] **Step 1: Create the panel component**
 
 Create `components/GraphTuningPanel.tsx`:
 
@@ -810,7 +810,7 @@ export default function GraphTuningPanel({ config, reheat }: Props) {
 }
 ```
 
-- [ ] **Step 2: Wire the toggle into ProjectGraph**
+- [x] **Step 2: Wire the toggle into ProjectGraph**
 
 In `components/ProjectGraph.tsx`:
 
@@ -839,7 +839,7 @@ In `components/ProjectGraph.tsx`:
       )}
 ```
 
-- [ ] **Step 3: Type-check, lint, test, build**
+- [x] **Step 3: Type-check, lint, test, build**
 
 ```bash
 npx tsc --noEmit
@@ -850,7 +850,7 @@ npm run build
 
 Expected: all clean.
 
-- [ ] **Step 4: Manual smoke check**
+- [x] **Step 4: Manual smoke check**
 
 `npm run dev` → `http://localhost:3000/projects`:
 1. Press `g`: panel appears top-right over the graph. Press `g` again: hides.
@@ -859,7 +859,7 @@ Expected: all clean.
 4. Panel does not intercept graph drags outside its box; typing `g` toggles even after clicking the canvas.
 Kill the dev server.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add components/GraphTuningPanel.tsx components/ProjectGraph.tsx
@@ -873,3 +873,16 @@ git commit -m "feat: dev-only physics tuning panel behind g key"
 1. **Tuning session (Bryan + Alfred, interactive):** site and Obsidian vault side by side; tune sliders until drag ripple / release exhale / weight match; hard-code the winning values into `DEFAULT_CONFIG`; commit.
 2. Judge against the spec's five behaviours. If short of "much much closer" → execute pre-agreed Option A (swap `lib/forceSim.ts` internals for the real `d3-force` package; component API unchanged).
 3. Merge `graph-physics` → `main` locally. Pushing waits for Bryan's pending repo walkthrough.
+
+---
+
+## Execution notes (2026-07-29, all 5 tasks complete)
+
+Two deviations from the plan as written, both fixes to the PLAN, not the port:
+
+1. **Task 3 degree-bias test precision.** The plan asserted an exact 3:1 leaf:hub velocity ratio. Real d3 semantics make that impossible: the link force reads position+velocity, so rest-length spokes react within the same tick to the hub's fresh velocity (measured ratio ≈ 3.2). Assertion widened to a 2.5–4 band. Implementation untouched — it matches the d3 source verbatim.
+2. **Task 5 panel wiring.** The plan rendered `simRef.current` during render, which the repo's react-hooks/refs lint rule correctly rejects. Fixed with a state mirror: `setSim(simRef.current)` once in the init effect; render reads the state, handlers/draw loop keep the ref.
+
+Verification at completion: `npx vitest run` 15/15 passing · `npx tsc --noEmit` clean · `npm run build` clean · touched files eslint-clean (4 pre-existing lint errors elsewhere on main — `app/projects/page.tsx`, `Globe.tsx` ×2, `PageTransitionWrapper.tsx` — untouched by this branch, left for housekeeping). Playwright smoke: standstill-at-rest, swim-during-drag, exhale-after-release, refreeze, detail-panel-click, panel g-toggle + live slider reheat — all pass.
+
+Remaining (requires Bryan): side-by-side tuning against his Obsidian vault; then hard-code winning values into `DEFAULT_CONFIG`; merge to main locally. NO PUSH.
