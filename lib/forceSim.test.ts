@@ -84,7 +84,7 @@ describe("core simulation", () => {
     expect(DEFAULT_CONFIG.alphaDecay).toBeCloseTo(1 - Math.pow(0.001, 1 / 300), 6)   // sim.js:243
     expect(DEFAULT_CONFIG.alphaMin).toBe(0.001)
     expect(DEFAULT_CONFIG.centerStrength).toBe(0.1)                                  // sim.js: c = .1
-    expect(DEFAULT_CONFIG.repelStrength).toBe(-160)                                  // -1000 × 0.4²
+    expect(DEFAULT_CONFIG.repelStrength).toBe(-224)                                  // -1400 × 0.4² (tuned 2026-08-01, was Obsidian's -1000)
     expect(DEFAULT_CONFIG.collideRadius).toBe(24)                                    // 60 × 0.4
     expect(DEFAULT_CONFIG.collideStrength).toBe(0.5)
   })

@@ -41,12 +41,14 @@ export type SimConfig = {
 // runs the same world at 0.4× (linkDistance 100), so lengths scale by
 // s = 0.4 and the repel constant by s² — trajectories stay geometrically
 // identical: repel -160, distanceMin 12, collideRadius 24.
+// 2026-08-01: repel bumped -160 → -224 (Obsidian-equivalent -1400) for
+// label readability on mobile — nodes sat too close to read labels.
 export const DEFAULT_CONFIG: Omit<SimConfig, "centerX" | "centerY"> = {
   alphaDecay:       1 - Math.pow(0.001, 1 / 300),  // Obsidian sim.js:243 (= d3 default)
   alphaMin:         0.001,
   velocityDecay:    0.4,     // Obsidian integrates vx *= .6
   reheatTarget:     0.3,     // Obsidian drag: alpha = alphaTarget = 0.3
-  repelStrength:    -160,    // Obsidian -1000 × s²
+  repelStrength:    -224,    // Obsidian -1400 × s² (default -1000; +40% for label spacing)
   repelDistanceMin: 12,      // Obsidian 30 × s
   repelDistanceMax: 2000,    // Obsidian has none (∞); 2000 ≫ world size ≈ none, tunable
   linkDistance:     100,     // Obsidian 250 × s — current graph density
