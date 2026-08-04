@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import ProjectGraph from "@/components/ProjectGraph"
+import ProjectImage from "@/components/ProjectImage"
 import { Project } from "@/data/projects"
 import { Certification } from "@/data/certifications"
 
@@ -115,25 +116,11 @@ export default function Projects() {
                   </div>
 
                   {/* Image */}
-                  <div style={{
-                    width: selected.portrait ? 260 : "100%",
-                    margin: selected.portrait ? "0 auto" : undefined,
-                    flexShrink: 0,
-                  }}>
-                    <div style={{
-                      position: "relative", width: "100%",
-                      aspectRatio: selected.portrait ? "9/16" : "16/9",
-                      borderRadius: 10, overflow: "hidden", background: "#060d14",
-                    }}>
-                      <Image
-                        src={selected.image}
-                        alt={selected.name}
-                        fill
-                        sizes="(max-width: 1200px) 50vw, 576px"
-                        className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"}
-                      />
-                    </div>
-                  </div>
+                  <ProjectImage
+                    project={selected}
+                    portraitWidth={260}
+                    sizes="(max-width: 1200px) 50vw, 576px"
+                  />
 
                   {/* Description */}
                   <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
@@ -289,15 +276,7 @@ export default function Projects() {
               )}
 
               {/* Image */}
-              <div style={{
-                width: selected.portrait ? 220 : "100%",
-                margin: selected.portrait ? "0 auto" : undefined,
-                flexShrink: 0,
-              }}>
-                <div style={{ position: "relative", width: "100%", aspectRatio: selected.portrait ? "9/16" : "16/9", borderRadius: 10, overflow: "hidden", background: "#060d14" }}>
-                  <Image src={selected.image} alt={selected.name} fill sizes="100vw" className={selected.imageStyle === "contain" ? "object-contain" : "object-cover"} />
-                </div>
-              </div>
+              <ProjectImage project={selected} portraitWidth={220} sizes="100vw" />
 
               {/* Description */}
               <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>

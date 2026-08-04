@@ -2,7 +2,7 @@ export type Project = {
   id: string
   name: string
   description: string
-  image: string
+  image?: string                      // optional: projects without a screenshot render a typographic panel
   imageStyle?: "cover" | "contain"   // default "cover"; use "contain" for portrait images
   portrait?: boolean                  // true = use 9/16 aspect ratio container instead of 16/9
   tags: string[]
@@ -64,6 +64,36 @@ export const projects: Project[] = [
     image: "/images/nutrient-analysis.jpg",
     tags: ["Electron", "React", "TypeScript", "Node.js"],
     github: "https://github.com/BryLJT/nutrient-scraper",
+    featured: true,
+  },
+  {
+    id: "cupp",
+    name: "Cupp",
+    description: "Specialty coffee logging app with an AI bag scanner. Photograph a bag and a vision model extracts the bean details, with every field carrying the source text it was read from, so a wrong reading is visible instead of silent. Built with two friends in a four-week sprint; scan time tuned from 35 seconds to under 10.",
+    image: "/images/cupp.jpg",
+    tags: ["React Native", "Expo", "Supabase", "TypeScript"],
+    github: "https://github.com/BryLJT/cupp",
+    featured: true,
+  },
+  {
+    id: "statement-sender",
+    name: "Statement Sender",
+    description: "Desktop app that automates a financial consultant's monthly statement send-out to over 600 clients. An identity gate matches each client's ID across two pages before anything is captured, and capture is kept separate from sending so nothing leaves without a human release. 50 automated tests.",
+    tags: ["Electron", "Playwright", "Node.js"],
+    featured: true,
+  },
+  {
+    id: "accellearn-invoicing",
+    name: "AccelLearn Invoicing",
+    description: "Invoice and receipt generator used by a tuition centre's admin team. It reads their live spreadsheet and produces per-student PDFs. I joined as a second developer: fixed two production bugs, added duplicate-name safeguards, and shipped a release to the client.",
+    tags: ["Next.js", "Electron", "TypeScript", "React"],
+    featured: true,
+  },
+  {
+    id: "mac-mini-server",
+    name: "Mac Mini Home Server",
+    description: "Self-hosted M4 Mac mini running a private photo library for my family, replacing a cloud subscription. Phones back up automatically over the local network to an external drive.",
+    tags: ["Self-Hosting", "Docker", "Immich", "Networking"],
     featured: true,
   },
 ]
