@@ -106,6 +106,12 @@ export default function Projects() {
                           Live ↗
                         </a>
                       )}
+                      {selected.demo && (
+                        <a href={selected.demo} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 13, color: "#fabc0e", fontWeight: 600, textDecoration: "none" }}>
+                          Demo ↗
+                        </a>
+                      )}
                       {selected.github && (
                         <a href={selected.github} target="_blank" rel="noopener noreferrer"
                           style={{ fontSize: 13, color: "var(--foreground)", fontWeight: 500, textDecoration: "none", opacity: 0.6 }}>
@@ -258,12 +264,18 @@ export default function Projects() {
               </div>
 
               {/* Links */}
-              {(selected.live || selected.github) && (
+              {(selected.live || selected.demo || selected.github) && (
                 <div style={{ display: "flex", gap: 16 }}>
                   {selected.live && (
                     <a href={selected.live} target="_blank" rel="noopener noreferrer"
                       style={{ fontSize: 13, color: "#fabc0e", fontWeight: 600, textDecoration: "none" }}>
                       Live ↗
+                    </a>
+                  )}
+                  {selected.demo && (
+                    <a href={selected.demo} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 13, color: "#fabc0e", fontWeight: 600, textDecoration: "none" }}>
+                      Demo ↗
                     </a>
                   )}
                   {selected.github && (

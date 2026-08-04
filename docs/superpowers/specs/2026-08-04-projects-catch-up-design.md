@@ -119,10 +119,49 @@ other six are `false`. Bryan's pick, 2026-08-04. Still read by nothing — the f
 column and node sparkle from the 2026-07-28 refresh are the intended consumers — but the
 decision is recorded in the data rather than left as ten meaningless `true`s.
 
+## Node sparkle — radar ring on featured graph nodes (built)
+
+Implements section 4 of the 2026-07-28 design, unchanged from what was agreed there.
+
+- `GraphNode` gains `featured?: boolean`, mirrored from `Project.featured` in `buildGraphData()`.
+- `nodeRadius()` takes `(type, featured)`. Featured projects render at **12** instead of 9.
+  The signature change matters: the same helper feeds both drawing and hit-testing
+  (`findNode`), so a larger node cannot end up with a smaller click target.
+- **Ring:** expands from the node edge outward by 22 world units over a 2600ms cycle,
+  fading with an eased curve so it lingers near the node and thins toward the edge.
+  Stroke is `1.5 / cam.zoom` so it stays a constant width on screen as the user zooms.
+- **Phase offset per node**, derived by hashing the node id. Without it all four rings
+  pulse in unison, which reads as a glitch rather than a highlight. Hashing the id keeps
+  it stable across re-renders and independent of array order — no randomness, no
+  dependence on iteration sequence.
+- **`prefers-reduced-motion: reduce`** → larger radius and brighter glow retained, plus a
+  **static** ring at a fixed radius. Read via `matchMedia` with a `change` listener, so
+  toggling the OS setting takes effect without a reload.
+- Cost is negligible: four extra `arc` strokes per frame in a loop that already runs.
+
+### Verification
+
+- Featured four ringed and larger; the other six plain. Confirmed by screenshot.
+- **Animation proven by frame comparison**, not assumed: two frames a half-cycle apart
+  differ under normal motion, and are **byte-identical** under patched reduced-motion.
+  The normal-motion pair was kept as a control so "identical" means something.
+- Reduced-motion tested by patching `window.matchMedia` and forcing a client-side
+  remount, since the Playwright MCP tools cannot emulate that media feature directly.
+
+## Cupp demo link
+
+Added `demo?: string` to `Project`, rendered as "Demo ↗" beside Live/GitHub in both the
+desktop panel and the mobile sheet. Cupp points at `https://youtu.be/5ildYIXu0D8`
+(verified 200, oEmbed title "cupp launchpad demo").
+
+Kept as its own field rather than reusing `live`: `live` renders as "Live", which would
+wrongly imply the app runs at that URL. Cupp has no live URL — it is Expo Go only.
+
 ## Explicitly out of scope
 
-- **The rest of the 2026-07-28 refresh** — featured column, node sparkle, radar ring.
-  Designed, unbuilt. The `featured` values above unblock it.
+- **The featured column** — the persistent right-hand card list from the 2026-07-28
+  design. Bryan deferred it ("we can work on the featured column another time"). The
+  `featured` flag now drives the sparkle, so the column is the only remaining consumer.
 
 ## Free consequence
 

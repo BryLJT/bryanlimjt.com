@@ -9,6 +9,11 @@ export type Project = {
   github?: string
   live?: string
   /**
+   * Link to a video walkthrough. Kept separate from `live` on purpose — `live`
+   * renders as "Live", which would wrongly imply the product runs at that URL.
+   */
+  demo?: string
+  /**
    * The four projects surfaced ahead of the rest (Bryan's pick, 2026-08-04).
    * Read by nothing yet — the featured column and node sparkle from the
    * 2026-07-28 refresh are the intended consumers.
@@ -98,6 +103,7 @@ export const projects: Project[] = [
     image: "/images/cupp.jpg",
     tags: ["React Native", "Expo", "Supabase", "TypeScript"],
     github: "https://github.com/BryLJT/cupp",
+    demo: "https://youtu.be/5ildYIXu0D8",
     featured: true,
     location: [6.2486, -75.5636],     // Medellin
   },

@@ -6,6 +6,8 @@ export type GraphNode = {
   label: string
   type: "project" | "tech" | "certification"
   projectId?: string
+  /** Mirrors Project.featured. Project nodes only — drives the radar ring and larger radius. */
+  featured?: boolean
   // injected by force simulation at runtime
   x?: number
   y?: number
@@ -27,7 +29,7 @@ export function buildGraphData(): GraphData {
   const techSeen = new Set<string>()
 
   for (const p of projects) {
-    nodes.push({ id: p.id, label: p.name, type: "project", projectId: p.id })
+    nodes.push({ id: p.id, label: p.name, type: "project", projectId: p.id, featured: p.featured })
 
     for (const tag of p.tags) {
       const techId = `tech:${tag}`

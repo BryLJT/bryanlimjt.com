@@ -20,8 +20,29 @@ type SimNode = GraphNode & SimBody
 
 // ─── Visual helpers ───────────────────────────────────────────────────────────
 
-function nodeRadius(type: string) {
-  return type === "project" ? 9 : type === "certification" ? 7 : 4
+// Featured projects sit slightly larger so the distinction survives a still
+// screenshot and a prefers-reduced-motion visitor, not just the ring animation.
+// Callers pass the node's own `featured` so drawing and hit-testing can't diverge.
+function nodeRadius(type: string, featured?: boolean) {
+  if (type === "project") return featured ? 12 : 9
+  return type === "certification" ? 7 : 4
+}
+
+// ─── Featured radar ring ──────────────────────────────────────────────────────
+
+const RING_PERIOD  = 2600   // ms for one expand-and-fade cycle
+const RING_SPREAD  = 22     // world units the ring travels beyond the node
+const RING_ALPHA   = 0.55   // opacity at the start of a cycle
+
+/**
+ * Stable per-node phase offset, so the featured rings don't pulse in unison
+ * (a synchronised throb reads as a glitch). Derived from the id, so it survives
+ * re-renders and never depends on array order or randomness.
+ */
+function ringPhase(id: string) {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000
+  return h / 1000
 }
 
 function nodeColor(type: string) {
@@ -106,7 +127,7 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     for (let i = nodes.length - 1; i >= 0; i--) {
       const n = nodes[i]
       if (n.type === "tech") continue                    // tech nodes are decorative, not clickable
-      const r  = nodeRadius(n.type) + 8 / zoom          // 8px screen-space hit margin, constant regardless of zoom
+      const r  = nodeRadius(n.type, n.featured) + 8 / zoom  // 8px screen-space hit margin, constant regardless of zoom
       const dx = wx - n.x, dy = wy - n.y
       if (dx * dx + dy * dy <= r * r) return n
     }
@@ -121,6 +142,14 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     if (!ctx) return
 
     let lastW = 0, lastH = 0
+
+    // Respect the OS "reduce motion" setting: featured nodes keep their larger
+    // radius, brighter glow and a static ring, but stop pulsing. Tracked live so
+    // toggling the setting takes effect without a reload.
+    const motionMq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    let reduceMotion = motionMq.matches
+    const onMotionChange = (e: MediaQueryListEvent) => { reduceMotion = e.matches }
+    motionMq.addEventListener("change", onMotionChange)
 
     const draw = () => {
       const dpr  = window.devicePixelRatio || 1
@@ -172,19 +201,45 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
       const sel     = selectedRef.current
       const selCert = selectedCertRef.current
 
+      const now = performance.now()
+
       for (const node of nodes) {
         const { x, y } = node
-        const r         = nodeRadius(node.type)
-        const isProject = node.type === "project"
-        const isCert    = node.type === "certification"
-        const isHov     = node.id === hov
-        const isSel     = (isProject && sel?.id === node.projectId) || (isCert && selCert?.id === node.id)
-        const color     = nodeColor(node.type)
+        const r          = nodeRadius(node.type, node.featured)
+        const isProject  = node.type === "project"
+        const isCert     = node.type === "certification"
+        const isHov      = node.id === hov
+        const isSel      = (isProject && sel?.id === node.projectId) || (isCert && selCert?.id === node.id)
+        const isFeatured = isProject && !!node.featured
+        const color      = nodeColor(node.type)
+
+        // Radar ring — featured projects only. Expands out from the node and
+        // fades, then repeats. Drawn before the glow so the node sits on top.
+        if (isFeatured) {
+          // Constant screen-space stroke: the context is scaled by cam.zoom, so
+          // dividing keeps the ring from thickening as the user zooms in.
+          ctx.lineWidth = 1.5 / cam.zoom
+
+          if (reduceMotion) {
+            ctx.beginPath()
+            ctx.arc(x, y, r + RING_SPREAD * 0.45, 0, Math.PI * 2)
+            ctx.strokeStyle = `rgba(250,188,14,${RING_ALPHA * 0.5})`
+            ctx.stroke()
+          } else {
+            const t = ((now / RING_PERIOD) + ringPhase(node.id)) % 1
+            ctx.beginPath()
+            ctx.arc(x, y, r + t * RING_SPREAD, 0, Math.PI * 2)
+            // Fade out over the cycle; eased so it lingers near the node and
+            // thins out toward the edge rather than vanishing abruptly.
+            ctx.strokeStyle = `rgba(250,188,14,${RING_ALPHA * (1 - t) * (1 - t)})`
+            ctx.stroke()
+          }
+        }
 
         // Glow (project + cert only)
         if (isProject || isCert) {
           const glowR  = isHov || isSel ? r * 4 : r + 10
-          const gAlpha = isHov || isSel ? "0.35" : "0.18"
+          const gAlpha = isHov || isSel ? "0.35" : isFeatured ? "0.28" : "0.18"
           const gColor = isProject
             ? `rgba(250,188,14,${gAlpha})`
             : `rgba(74,222,128,${gAlpha})`
@@ -224,7 +279,10 @@ export default function ProjectGraph({ onSelect, selected: selectedProp = null, 
     }
 
     animRef.current = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(animRef.current)
+    return () => {
+      cancelAnimationFrame(animRef.current)
+      motionMq.removeEventListener("change", onMotionChange)
+    }
   }, [])
 
   // ── Pointer handlers ──────────────────────────────────────────────────────────
