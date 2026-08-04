@@ -3,17 +3,17 @@
 import { useEffect, useRef, useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import createGlobe from "cobe"
+import { projects } from "@/data/projects"
 
 const GLOBE_SIZE  = 900  // WebGL render size (kept large for quality)
 const THETA = 0.1
 
-const MARKERS = [
-  { location: [1.3521,    103.8198] as [number, number], label: "Alfred"         },
-  { location: [37.7595,  -122.4367] as [number, number], label: "bryanlimjt.com" },
-  { location: [40.7128,   -74.0060] as [number, number], label: "AccelChat"      },
-  { location: [51.5074,   -0.1278 ] as [number, number], label: "AccelCalendar"  },
-  { location: [35.6762,   139.6503] as [number, number], label: "WeatherBot"     },
-]
+// Derived from data/projects.ts — never hand-maintained here. This list used to
+// be hardcoded and drifted from the data three ways: it missed a project
+// entirely, and spelled two others differently ("WeatherBot" vs "Weatherbot").
+// Labels now come from `name` and placements from `location`, so both are
+// impossible to desync.
+const MARKERS = projects.map(p => ({ location: p.location, label: p.name }))
 
 // cobe projects markers from radius ee(0.8) + markerElevation(0.05) = 0.85,
 // not the unit sphere. Scaling here keeps SVG callouts on the marker centers.

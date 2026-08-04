@@ -81,15 +81,48 @@ The name is `aria-hidden` — it is decorative, and the real name is already an 
   capturable but each needs real PII on screen (client data, student names, family photos),
   so each deserves a deliberate pass rather than a rushed capture.
 
+## Globe — markers now derive from the data (added in the same session)
+
+Originally deferred, then brought into scope by Bryan. This is the `location`-field fix
+agreed on 2026-07-28.
+
+`Globe.tsx` no longer keeps its own marker list. It maps over `projects`, taking the label
+from `name` and the position from `location`. That closes all three recorded drifts at
+once: the missing project, and the `"WeatherBot"`/`"AccelChat"` spellings that disagreed
+with `"Weatherbot"`/`"Accelchat"` in the data.
+
+`location` is **required**, not optional. An optional field would let a future project be
+added with no marker and no complaint, which is exactly how the original drift happened.
+Required means the type system forces the decision.
+
+Placements are decorative, per Bryan's 2026-07-28 call — a pleasing spread, not a claim
+about where anything runs. The five new ones deliberately fill the empty southern
+hemisphere and the Europe-to-Asia gap, since the original five were all northern:
+
+| Project | Marker | Why there |
+|---|---|---|
+| Nutrient Analysis | Sydney | AFCD is the Australian food database |
+| Cupp | Medellin | coffee; the demo bean is Colombian |
+| Statement Sender | Dubai | financial hub, fills the Europe-to-Asia gap |
+| AccelLearn Invoicing | Mumbai | fills the India gap |
+| Mac Mini Home Server | Cape Town | fills Africa and the southern hemisphere |
+
+**Density was checked, not assumed.** Ten markers do not crowd the globe: the back
+hemisphere is culled, so roughly half are ever on screen, and the callout labels do not
+collide on either side. Verified by screenshotting both hemispheres, rotating the second
+one into view by dispatching a synthetic drag.
+
+## Featured four
+
+`featured` is now meaningful: **Accelchat, AccelCalendar, Alfred, Cupp** are `true`, the
+other six are `false`. Bryan's pick, 2026-08-04. Still read by nothing — the featured
+column and node sparkle from the 2026-07-28 refresh are the intended consumers — but the
+decision is recorded in the data rather than left as ten meaningless `true`s.
+
 ## Explicitly out of scope
 
-- **The globe.** Markers stay hardcoded in `Globe.tsx`. Drift widens from 1 missing project
-  to 5. The markers are already decorative fiction, so this is cosmetic, but the structural
-  fix (a `location` field on `Project` driving markers from the data file, agreed 2026-07-28)
-  is a visible landing-page change and needs its own decision.
-- **The 2026-07-28 refresh** — featured column, node sparkle, radar ring. Untouched.
-- `featured: true` on all ten projects, matching the existing six. The flag stays dead data
-  until the refresh builds a consumer for it.
+- **The rest of the 2026-07-28 refresh** — featured column, node sparkle, radar ring.
+  Designed, unbuilt. The `featured` values above unblock it.
 
 ## Free consequence
 

@@ -8,7 +8,26 @@ export type Project = {
   tags: string[]
   github?: string
   live?: string
+  /**
+   * The four projects surfaced ahead of the rest (Bryan's pick, 2026-08-04).
+   * Read by nothing yet — the featured column and node sparkle from the
+   * 2026-07-28 refresh are the intended consumers.
+   */
   featured: boolean
+  /**
+   * [lat, lng] of this project's marker on the landing-page globe.
+   *
+   * Deliberately DECORATIVE — the placements are a pleasing spread, not a claim
+   * about where anything runs or who it serves. Chosen so markers distribute
+   * across the sphere instead of clumping in one hemisphere.
+   *
+   * Required on purpose. The globe used to hardcode its own marker list inside
+   * Globe.tsx, which silently drifted from this file three ways (a missing
+   * project, plus "WeatherBot"/"AccelChat" vs "Weatherbot"/"Accelchat"). Making
+   * this mandatory means a project cannot be added without deciding where it
+   * sits, so the two lists can no longer disagree.
+   */
+  location: [number, number]
 }
 
 export const projects: Project[] = [
@@ -19,6 +38,7 @@ export const projects: Project[] = [
     image: "/images/accelchat.jpg",
     tags: ["AWS Cloud Architecture", "Next.js", "Node.js", "Socket.IO"],
     featured: true,
+    location: [40.7128, -74.0060],    // New York
   },
   {
     id: "accelcalendar",
@@ -27,6 +47,7 @@ export const projects: Project[] = [
     image: "/images/accelcalendar.jpg",
     tags: ["Next.js", "TypeScript", "PostgreSQL"],
     featured: true,
+    location: [51.5074, -0.1278],     // London
   },
   {
     id: "alfred",
@@ -36,6 +57,7 @@ export const projects: Project[] = [
     imageStyle: "contain",
     tags: ["Claude Code", "Python", "Memory Systems"],
     featured: true,
+    location: [1.3521, 103.8198],     // Singapore
   },
   {
     id: "bryanlimjt-com",
@@ -45,7 +67,8 @@ export const projects: Project[] = [
     tags: ["Next.js", "Tailwind CSS", "Vercel"],
     live: "https://bryanlimjt.com",
     github: "https://github.com/BryLJT/bryanlimjt.com",
-    featured: true,
+    featured: false,
+    location: [37.7595, -122.4367],   // San Francisco
   },
   {
     id: "weatherbot",
@@ -55,7 +78,8 @@ export const projects: Project[] = [
     imageStyle: "cover",
     portrait: true,
     tags: ["Python", "Telegram API", "Data.gov.sg"],
-    featured: true,
+    featured: false,
+    location: [35.6762, 139.6503],    // Tokyo
   },
   {
     id: "nutrient-analysis",
@@ -64,7 +88,8 @@ export const projects: Project[] = [
     image: "/images/nutrient-analysis.jpg",
     tags: ["Electron", "React", "TypeScript", "Node.js"],
     github: "https://github.com/BryLJT/nutrient-scraper",
-    featured: true,
+    featured: false,
+    location: [-33.8688, 151.2093],   // Sydney
   },
   {
     id: "cupp",
@@ -74,26 +99,30 @@ export const projects: Project[] = [
     tags: ["React Native", "Expo", "Supabase", "TypeScript"],
     github: "https://github.com/BryLJT/cupp",
     featured: true,
+    location: [6.2486, -75.5636],     // Medellin
   },
   {
     id: "statement-sender",
     name: "Statement Sender",
     description: "Desktop app that automates a financial consultant's monthly statement send-out to over 600 clients. An identity gate matches each client's ID across two pages before anything is captured, and capture is kept separate from sending so nothing leaves without a human release. 50 automated tests.",
     tags: ["Electron", "Playwright", "Node.js"],
-    featured: true,
+    featured: false,
+    location: [25.2048, 55.2708],     // Dubai
   },
   {
     id: "accellearn-invoicing",
     name: "AccelLearn Invoicing",
     description: "Invoice and receipt generator used by a tuition centre's admin team. It reads their live spreadsheet and produces per-student PDFs. I joined as a second developer: fixed two production bugs, added duplicate-name safeguards, and shipped a release to the client.",
     tags: ["Next.js", "Electron", "TypeScript", "React"],
-    featured: true,
+    featured: false,
+    location: [19.0760, 72.8777],     // Mumbai
   },
   {
     id: "mac-mini-server",
     name: "Mac Mini Home Server",
     description: "Self-hosted M4 Mac mini running a private photo library for my family, replacing a cloud subscription. Phones back up automatically over the local network to an external drive.",
     tags: ["Self-Hosting", "Docker", "Immich", "Networking"],
-    featured: true,
+    featured: false,
+    location: [-33.9249, 18.4241],    // Cape Town
   },
 ]
