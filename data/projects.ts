@@ -131,4 +131,17 @@ export const projects: Project[] = [
     featured: false,
     location: [-33.9249, 18.4241],    // Cape Town
   },
+  {
+    id: "rvmj",
+    name: "RVMJ",
+    description: "Mahjong scoreboard and permanent leaderboard for my friend group. Players tap a seat to join a live table, scores settle across all four seats automatically, and rare hands get logged to a 23-hand catalogue with a photo of the winning tiles. 37 players on the board and 659 automated tests behind it.",
+    tags: ["Next.js", "TypeScript", "Supabase", "PostgreSQL"],
+    github: "https://github.com/BryLJT/rvmj",
+    live: "https://rvmj.vercel.app",
+    featured: false,
+    // No `image` on purpose: the board lists 37 real people by name, and a
+    // screenshot here would republish them to a portfolio audience. The
+    // typographic fallback in ProjectImage covers it.
+    location: [22.3193, 114.1694],    // Hong Kong
+  },
 ]
